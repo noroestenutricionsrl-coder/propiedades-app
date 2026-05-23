@@ -1,0 +1,62 @@
+{% extends 'core/base.html' %}
+{% block title %}Propiedades{% endblock %}
+{% block page_title %}Propiedades{% endblock %}
+{% block topbar_actions %}
+{% if request.user.perfil.rol != 'consulta' %}
+<a href="/admin/core/propiedad/add/" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Nueva propiedad</a>
+{% endif %}
+{% endblock %}
+{% block content %}
+<div class="filtros">
+  <form method="get" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+    <input type="text" name="q" placeholder="Buscar por domicilio o padrón…" value="{{ busqueda }}" style="padding:8px 12px;border:1px solid #d4e3d9;border-radius:8px;font-size:0.875rem;min-width:280px">
+    <select name="estado">
+      <option value="">Todos los estados</option>
+      <option value="disponible" {% if estado_filtro == 'disponible' %}selected{% endif %}>Disponible</option>
+      <option value="alquilada" {% if estado_filtro == 'alquilada' %}selected{% endif %}>Alquilada</option>
+      <option value="mantenimiento" {% if estado_filtro == 'mantenimiento' %}selected{% endif %}>En mantenimiento</option>
+    </select>
+    <button type="submit" class="btn btn-secondary btn-sm"><i class="fa-solid fa-search"></i> Filtrar</button>
+  </form>
+</div>
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">{{ propiedades.count }} propiedad{{ propiedades.count|pluralize:"es" }} encontrada{{ propiedades.count|pluralize:"s" }}</span>
+  </div>
+  <div class="card-body">
+  {% if propiedades %}
+  <table>
+    <thead>
+      <tr>
+        <th>Domicilio</th>
+        <th>Propietario</th>
+        <th>Padrón Catastral</th>
+        <th>Padrón Municipal</th>
+        <th>Estado</th>
+        <th>Servicios</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for p in propiedades %}
+    <tr>
+      <td><strong>{{ p.domicilio }}</strong>{% if p.descripcion %}<br><small style="color:#5a7060">{{ p.descripcion }}</small>{% endif %}</td>
+      <td>{{ p.propietario }}</td>
+      <td><code style="font-size:0.8rem;background:#f0f4f1;padding:2px 6px;border-radius:4px">{{ p.padron_catastral|default:"—" }}</code></td>
+      <td><code style="font-size:0.8rem;background:#f0f4f1;padding:2px 6px;border-radius:4px">{{ p.padron_municipal|default:"—" }}</code></td>
+      <td><span class="badge badge-{{ p.estado }}">{{ p.get_estado_display }}</span></td>
+      <td style="color:#5a7060;font-size:0.82rem">{{ p.servicios.count }} servicio{{ p.servicios.count|pluralize:"s" }}</td>
+      <td><a href="{% url 'propiedad_detalle' p.pk %}" class="btn btn-secondary btn-sm"><i class="fa-solid fa-eye"></i> Ver</a></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state">
+    <i class="fa-solid fa-house"></i>
+    <p>No se encontraron propiedades.</p>
+  </div>
+  {% endif %}
+  </div>
+</div>
+{% endblock %}

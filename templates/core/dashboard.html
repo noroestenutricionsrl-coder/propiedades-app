@@ -1,0 +1,124 @@
+{% extends 'core/base.html' %}
+{% block title %}Dashboard — Gestión de Propiedades{% endblock %}
+{% block page_title %}Dashboard — {{ mes_nombre }}{% endblock %}
+
+{% block content %}
+<!-- STATS -->
+<div class="stat-grid">
+  <div class="stat-card">
+    <i class="fa-solid fa-house stat-icon"></i>
+    <div class="stat-number">{{ stats.total_propiedades }}</div>
+    <div class="stat-label">Propiedades</div>
+  </div>
+  <div class="stat-card">
+    <i class="fa-solid fa-key stat-icon"></i>
+    <div class="stat-number">{{ stats.propiedades_alquiladas }}</div>
+    <div class="stat-label">Alquiladas</div>
+  </div>
+  <div class="stat-card advertencia">
+    <i class="fa-solid fa-clock stat-icon"></i>
+    <div class="stat-number">{{ stats.vencimientos_proximos }}</div>
+    <div class="stat-label">Vencen en 7 días</div>
+  </div>
+  <div class="stat-card alerta">
+    <i class="fa-solid fa-triangle-exclamation stat-icon"></i>
+    <div class="stat-number">{{ stats.vencimientos_vencidos }}</div>
+    <div class="stat-label">Vencidos sin pagar</div>
+  </div>
+  <div class="stat-card">
+    <i class="fa-solid fa-check-circle stat-icon"></i>
+    <div class="stat-number">{{ stats.pagos_mes }}</div>
+    <div class="stat-label">Pagos este mes</div>
+  </div>
+</div>
+
+<!-- ALERTAS URGENTES -->
+{% if vencidos %}
+<div class="card" style="border-left: 4px solid #c0392b;">
+  <div class="card-header">
+    <span class="card-title" style="color:#c0392b;"><i class="fa-solid fa-triangle-exclamation"></i> Vencimientos sin pagar</span>
+    <a href="{% url 'vencimientos_lista' %}?estado=vencido" class="btn btn-secondary btn-sm">Ver todos</a>
+  </div>
+  <div class="card-body">
+    <table>
+      <thead><tr><th>Propiedad</th><th>Servicio</th><th>Vencimiento</th><th>Importe</th><th>Acción</th></tr></thead>
+      <tbody>
+      {% for v in vencidos %}
+      <tr class="alerta-row">
+        <td><strong>{{ v.propiedad_servicio.propiedad.domicilio }}</strong></td>
+        <td>{{ v.propiedad_servicio.servicio.nombre }}</td>
+        <td>{{ v.fecha_vencimiento|date:"d/m/Y" }}</td>
+        <td>{% if v.importe_estimado %}$ {{ v.importe_estimado|floatformat:0 }}{% else %}—{% endif %}</td>
+        <td><a href="{% url 'registrar_pago' v.pk %}?next=/" class="btn btn-primary btn-sm"><i class="fa-solid fa-check"></i> Registrar pago</a></td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<!-- PRÓXIMOS 7 DÍAS -->
+{% if proximos %}
+<div class="card" style="border-left: 4px solid #d4a017;">
+  <div class="card-header">
+    <span class="card-title"><i class="fa-solid fa-bell" style="color:#d4a017"></i> Próximos 7 días</span>
+  </div>
+  <div class="card-body">
+    <table>
+      <thead><tr><th>Propiedad</th><th>Servicio</th><th>Vencimiento</th><th>Importe</th><th>Responsable</th><th>Acción</th></tr></thead>
+      <tbody>
+      {% for v in proximos %}
+      <tr class="advertencia-row">
+        <td><strong>{{ v.propiedad_servicio.propiedad.domicilio }}</strong></td>
+        <td>{{ v.propiedad_servicio.servicio.nombre }}</td>
+        <td>{{ v.fecha_vencimiento|date:"d/m/Y" }}</td>
+        <td>{% if v.importe_estimado %}$ {{ v.importe_estimado|floatformat:0 }}{% else %}—{% endif %}</td>
+        <td><span class="badge badge-{{ v.propiedad_servicio.responsable_pago }}">{{ v.propiedad_servicio.get_responsable_pago_display }}</span></td>
+        <td><a href="{% url 'registrar_pago' v.pk %}?next=/" class="btn btn-secondary btn-sm"><i class="fa-solid fa-check"></i> Pagar</a></td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<!-- TODOS LOS DEL MES -->
+<div class="card">
+  <div class="card-header">
+    <span class="card-title"><i class="fa-solid fa-calendar-days"></i> Todos los vencimientos de {{ mes_nombre }}</span>
+    <a href="{% url 'vencimientos_lista' %}" class="btn btn-secondary btn-sm">Ver con filtros</a>
+  </div>
+  <div class="card-body">
+    {% if mes_actual %}
+    <table>
+      <thead><tr><th>Propiedad</th><th>Servicio</th><th>Vencimiento</th><th>Importe</th><th>Estado</th><th>Acción</th></tr></thead>
+      <tbody>
+      {% for v in mes_actual %}
+      <tr>
+        <td><a href="{% url 'propiedad_detalle' v.propiedad_servicio.propiedad.pk %}" style="color:#1a5c3a;text-decoration:none;font-weight:500">{{ v.propiedad_servicio.propiedad.domicilio }}</a></td>
+        <td>{{ v.propiedad_servicio.servicio.nombre }}</td>
+        <td>{{ v.fecha_vencimiento|date:"d/m/Y" }}</td>
+        <td>{% if v.importe_estimado %}$ {{ v.importe_estimado|floatformat:0 }}{% else %}—{% endif %}</td>
+        <td><span class="badge badge-{{ v.estado }}">{{ v.get_estado_display }}</span></td>
+        <td>
+          {% if v.estado != 'pagado' %}
+          <a href="{% url 'registrar_pago' v.pk %}?next=/" class="btn btn-primary btn-sm"><i class="fa-solid fa-check"></i> Pagar</a>
+          {% else %}
+          <span style="color:#2d8653;font-size:0.8rem"><i class="fa-solid fa-check-double"></i> Pagado</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+      <i class="fa-solid fa-calendar-check"></i>
+      <p>No hay vencimientos cargados para este mes.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

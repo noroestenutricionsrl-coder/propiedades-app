@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Gestión de Propiedades{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root {
+  --verde: #1a5c3a;
+  --verde-claro: #2d8653;
+  --verde-suave: #e8f5ee;
+  --dorado: #c9963a;
+  --dorado-claro: #f5e6ce;
+  --texto: #1c2b20;
+  --texto-suave: #5a7060;
+  --borde: #d4e3d9;
+  --fondo: #f4f7f5;
+  --blanco: #ffffff;
+  --rojo: #c0392b;
+  --rojo-suave: #fdecea;
+  --amarillo: #d4a017;
+  --amarillo-suave: #fef9e7;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--fondo);
+  color: var(--texto);
+  min-height: 100vh;
+  display: flex;
+}
+/* SIDEBAR */
+.sidebar {
+  width: 260px;
+  min-height: 100vh;
+  background: var(--verde);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0;
+  z-index: 100;
+}
+.sidebar-logo {
+  padding: 28px 24px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.sidebar-logo h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.3rem;
+  line-height: 1.3;
+  color: white;
+}
+.sidebar-logo span {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.55);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: block;
+  margin-top: 2px;
+}
+.sidebar-nav { flex: 1; padding: 16px 0; }
+.nav-section {
+  padding: 8px 16px 4px;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.4);
+  margin-top: 8px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 24px;
+  color: rgba(255,255,255,0.8);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 400;
+  transition: all 0.15s;
+  border-left: 3px solid transparent;
+}
+.nav-item:hover, .nav-item.active {
+  background: rgba(255,255,255,0.1);
+  color: white;
+  border-left-color: var(--dorado);
+}
+.nav-item i { width: 18px; text-align: center; font-size: 0.9rem; }
+.sidebar-footer {
+  padding: 16px 24px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  font-size: 0.82rem;
+}
+.sidebar-footer .user-name { color: white; font-weight: 500; }
+.sidebar-footer .user-role { color: rgba(255,255,255,0.5); font-size: 0.75rem; }
+.sidebar-footer a {
+  color: rgba(255,255,255,0.6);
+  text-decoration: none;
+  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  transition: color 0.15s;
+}
+.sidebar-footer a:hover { color: white; }
+/* MAIN */
+.main {
+  margin-left: 260px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.topbar {
+  background: white;
+  border-bottom: 1px solid var(--borde);
+  padding: 16px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.topbar h2 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.35rem;
+  color: var(--texto);
+}
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+.badge-pendiente { background: var(--amarillo-suave); color: var(--amarillo); }
+.badge-pagado { background: var(--verde-suave); color: var(--verde-claro); }
+.badge-vencido { background: var(--rojo-suave); color: var(--rojo); }
+.badge-alquilada { background: var(--verde-suave); color: var(--verde); }
+.badge-disponible { background: #f0f0f0; color: #666; }
+.badge-mantenimiento { background: var(--amarillo-suave); color: var(--amarillo); }
+.content { padding: 32px; flex: 1; }
+/* CARDS */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+.stat-card {
+  background: white;
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  padding: 22px 24px;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--verde);
+}
+.stat-card.alerta::before { background: var(--rojo); }
+.stat-card.advertencia::before { background: var(--dorado); }
+.stat-number {
+  font-family: 'DM Serif Display', serif;
+  font-size: 2.2rem;
+  color: var(--texto);
+  line-height: 1;
+}
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--texto-suave);
+  margin-top: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.stat-icon {
+  position: absolute;
+  top: 18px; right: 18px;
+  font-size: 1.4rem;
+  color: var(--borde);
+}
+/* TABLAS */
+.card {
+  background: white;
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+.card-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--borde);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.card-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.05rem;
+  color: var(--texto);
+}
+.card-body { padding: 0; }
+table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+th {
+  text-align: left;
+  padding: 12px 20px;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--texto-suave);
+  background: #fafbfa;
+  border-bottom: 1px solid var(--borde);
+  font-weight: 600;
+}
+td {
+  padding: 13px 20px;
+  border-bottom: 1px solid #f0f4f1;
+  vertical-align: middle;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #fafcfb; }
+/* BOTONES */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  transition: all 0.15s;
+  font-family: 'DM Sans', sans-serif;
+}
+.btn-primary { background: var(--verde); color: white; }
+.btn-primary:hover { background: var(--verde-claro); color: white; }
+.btn-secondary { background: white; color: var(--verde); border: 1px solid var(--borde); }
+.btn-secondary:hover { background: var(--verde-suave); }
+.btn-danger { background: var(--rojo-suave); color: var(--rojo); }
+.btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+/* FORMULARIOS */
+.form-group { margin-bottom: 18px; }
+.form-label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--texto-suave);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.form-control {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--texto);
+  background: white;
+  transition: border-color 0.15s;
+}
+.form-control:focus {
+  outline: none;
+  border-color: var(--verde-claro);
+  box-shadow: 0 0 0 3px rgba(45,134,83,0.08);
+}
+/* FILTROS */
+.filtros {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.filtros select, .filtros input {
+  padding: 8px 12px;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-family: 'DM Sans', sans-serif;
+  background: white;
+  color: var(--texto);
+}
+/* ALERTAS */
+.alerta-row td { background: var(--rojo-suave) !important; }
+.advertencia-row td { background: var(--amarillo-suave) !important; }
+/* RESPONSIVO */
+@media (max-width: 768px) {
+  .sidebar { width: 0; overflow: hidden; }
+  .main { margin-left: 0; }
+  .content { padding: 16px; }
+}
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--texto-suave);
+}
+.empty-state i { font-size: 2.5rem; margin-bottom: 12px; opacity: 0.3; }
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <h1><i class="fa-solid fa-building-columns" style="font-size:1rem;opacity:0.8;margin-right:8px"></i>Gestión<br>de Propiedades</h1>
+    <span>Panel de control</span>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <a href="{% url 'dashboard' %}" class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+      <i class="fa-solid fa-chart-line"></i> Dashboard
+    </a>
+    <div class="nav-section">Gestión</div>
+    <a href="{% url 'propiedades_lista' %}" class="nav-item {% if 'propiedad' in request.resolver_match.url_name %}active{% endif %}">
+      <i class="fa-solid fa-house"></i> Propiedades
+    </a>
+    <a href="{% url 'vencimientos_lista' %}" class="nav-item {% if 'vencimiento' in request.resolver_match.url_name %}active{% endif %}">
+      <i class="fa-solid fa-calendar-days"></i> Vencimientos
+    </a>
+    <a href="#" class="nav-item">
+      <i class="fa-solid fa-file-invoice-dollar"></i> Pagos
+    </a>
+    <a href="#" class="nav-item">
+      <i class="fa-solid fa-file-contract"></i> Contratos
+    </a>
+    <div class="nav-section">Reportes</div>
+    <a href="#" class="nav-item">
+      <i class="fa-solid fa-file-excel"></i> Exportar Excel
+    </a>
+    {% if request.user.perfil.rol == 'admin' %}
+    <div class="nav-section">Sistema</div>
+    <a href="/admin/" class="nav-item">
+      <i class="fa-solid fa-gear"></i> Administración
+    </a>
+    {% endif %}
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+    <div class="user-role">{{ request.user.perfil.get_rol_display|default:"Usuario" }}</div>
+    <a href="{% url 'logout' %}"><i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión</a>
+  </div>
+</aside>
+<main class="main">
+  <div class="topbar">
+    <h2>{% block page_title %}{% endblock %}</h2>
+    <div class="topbar-right">{% block topbar_actions %}{% endblock %}</div>
+  </div>
+  <div class="content">
+    {% block content %}{% endblock %}
+  </div>
+</main>
+</body>
+</html>

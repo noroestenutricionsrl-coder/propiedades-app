@@ -1,0 +1,44 @@
+{% extends 'core/base.html' %}
+{% block title %}Registrar Pago{% endblock %}
+{% block page_title %}Registrar Pago{% endblock %}
+{% block content %}
+<div style="max-width:520px">
+  <div class="card" style="margin-bottom:16px;border-left:4px solid #1a5c3a">
+    <div class="card-body" style="padding:18px 20px">
+      <div style="font-size:0.8rem;color:#5a7060;text-transform:uppercase;letter-spacing:0.05em">Propiedad</div>
+      <div style="font-weight:600;font-size:1.05rem;margin-top:4px">{{ vencimiento.propiedad_servicio.propiedad.domicilio }}</div>
+      <div style="color:#5a7060;margin-top:4px">{{ vencimiento.propiedad_servicio.servicio.nombre }} — Vence: {{ vencimiento.fecha_vencimiento|date:"d/m/Y" }}</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">Datos del Pago</span></div>
+    <div class="card-body" style="padding:24px">
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.GET.next }}">
+        <div class="form-group">
+          <label class="form-label">Fecha de Pago</label>
+          <input type="date" name="fecha_pago" class="form-control" value="{{ hoy }}" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Importe Pagado ($)</label>
+          <input type="number" name="importe_pagado" class="form-control" step="0.01"
+            value="{{ vencimiento.importe_estimado|default:'' }}" placeholder="0.00" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">N° Comprobante <span style="color:#aaa;font-weight:400">(opcional)</span></label>
+          <input type="text" name="numero_comprobante" class="form-control" placeholder="Número o referencia">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Observaciones <span style="color:#aaa;font-weight:400">(opcional)</span></label>
+          <textarea name="observaciones" class="form-control" rows="2" placeholder="Notas adicionales…"></textarea>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:8px">
+          <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i> Confirmar pago</button>
+          <a href="{{ request.GET.next|default:'/' }}" class="btn btn-secondary">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

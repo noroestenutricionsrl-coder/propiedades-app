@@ -1,0 +1,88 @@
+{% extends 'core/base.html' %}
+{% block title %}Vencimientos{% endblock %}
+{% block page_title %}Vencimientos{% endblock %}
+{% block topbar_actions %}
+{% if request.user.perfil.rol != 'consulta' %}
+<a href="/admin/core/vencimiento/add/" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Nuevo vencimiento</a>
+{% endif %}
+{% endblock %}
+{% block content %}
+<form method="get">
+<div class="filtros">
+  <select name="mes">
+    {% for num, nombre in meses %}
+    <option value="{{ num }}" {% if mes == num %}selected{% endif %}>{{ nombre }}</option>
+    {% endfor %}
+  </select>
+  <input type="number" name="anio" value="{{ anio }}" style="width:90px">
+  <select name="estado">
+    <option value="">Todos los estados</option>
+    <option value="pendiente" {% if estado_filtro == 'pendiente' %}selected{% endif %}>Pendiente</option>
+    <option value="pagado" {% if estado_filtro == 'pagado' %}selected{% endif %}>Pagado</option>
+    <option value="vencido" {% if estado_filtro == 'vencido' %}selected{% endif %}>Vencido</option>
+  </select>
+  <select name="propiedad">
+    <option value="">Todas las propiedades</option>
+    {% for p in propiedades %}
+    <option value="{{ p.pk }}" {% if propiedad_filtro == p.pk|stringformat:"s" %}selected{% endif %}>{{ p.domicilio }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit" class="btn btn-secondary btn-sm"><i class="fa-solid fa-search"></i> Filtrar</button>
+</div>
+</form>
+
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">{{ vencimientos.count }} vencimiento{{ vencimientos.count|pluralize:"s" }}</span>
+  </div>
+  <div class="card-body">
+  {% if vencimientos %}
+  <table>
+    <thead>
+      <tr>
+        <th>Propiedad</th>
+        <th>Servicio/Impuesto</th>
+        <th>Período</th>
+        <th>Vencimiento</th>
+        <th>Importe</th>
+        <th>Responsable</th>
+        <th>Estado</th>
+        <th>Acción</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for v in vencimientos %}
+    <tr class="{% if v.estado == 'vencido' %}alerta-row{% elif v.estado == 'pendiente' %}advertencia-row{% endif %}">
+      <td><a href="{% url 'propiedad_detalle' v.propiedad_servicio.propiedad.pk %}" style="color:#1a5c3a;text-decoration:none;font-weight:500">{{ v.propiedad_servicio.propiedad.domicilio }}</a></td>
+      <td>{{ v.propiedad_servicio.servicio.nombre }}</td>
+      <td>{{ v.periodo|default:"—" }}</td>
+      <td>{{ v.fecha_vencimiento|date:"d/m/Y" }}</td>
+      <td>{% if v.importe_estimado %}$ {{ v.importe_estimado|floatformat:0 }}{% else %}—{% endif %}</td>
+      <td>
+        {% if v.propiedad_servicio.responsable_pago == 'propietario' %}
+        <span style="color:#1a5c3a;font-size:0.82rem"><i class="fa-solid fa-user"></i> Propietario</span>
+        {% else %}
+        <span style="color:#c9963a;font-size:0.82rem"><i class="fa-solid fa-person"></i> Inquilino</span>
+        {% endif %}
+      </td>
+      <td><span class="badge badge-{{ v.estado }}">{{ v.get_estado_display }}</span></td>
+      <td>
+        {% if v.estado != 'pagado' %}
+        <a href="{% url 'registrar_pago' v.pk %}?next={{ request.get_full_path }}" class="btn btn-primary btn-sm"><i class="fa-solid fa-check"></i> Pagar</a>
+        {% else %}
+        <span style="color:#2d8653;font-size:0.82rem"><i class="fa-solid fa-check-double"></i> {{ v.pago.fecha_pago|date:"d/m/Y" }}</span>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state">
+    <i class="fa-solid fa-calendar-check"></i>
+    <p>No hay vencimientos para los filtros seleccionados.</p>
+  </div>
+  {% endif %}
+  </div>
+</div>
+{% endblock %}
