@@ -183,3 +183,158 @@ def registrar_pago(request, vencimiento_id):
         'vencimiento': vencimiento,
         'hoy': date.today().isoformat(),
     })
+
+
+# ============ PROPIETARIOS ============
+
+@login_required
+def propietarios_lista(request):
+    propietarios = Propietario.objects.all()
+    return render(request, 'core/propietarios_lista.html', {'propietarios': propietarios})
+
+
+@login_required
+def propietario_crear(request):
+    from .forms import PropietarioForm
+    if request.user.perfil.rol == 'consulta':
+        return redirect('propietarios_lista')
+    if request.method == 'POST':
+        form = PropietarioForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('propietarios_lista')
+    else:
+        form = PropietarioForm()
+    return render(request, 'core/form_generico.html', {
+        'form': form, 'titulo': 'Nuevo Propietario', 'volver': 'propietarios_lista'
+    })
+
+
+@login_required
+def propietario_editar(request, pk):
+    from .forms import PropietarioForm
+    propietario = get_object_or_404(Propietario, pk=pk)
+    if request.user.perfil.rol == 'consulta':
+        return redirect('propietarios_lista')
+    if request.method == 'POST':
+        form = PropietarioForm(request.POST, instance=propietario)
+        if form.is_valid():
+            form.save()
+            return redirect('propietarios_lista')
+    else:
+        form = PropietarioForm(instance=propietario)
+    return render(request, 'core/form_generico.html', {
+        'form': form, 'titulo': f'Editar — {propietario}', 'volver': 'propietarios_lista'
+    })
+
+
+# ============ PROPIEDADES ============
+
+@login_required
+def propiedad_crear(request):
+    from .forms import PropiedadForm
+    if request.user.perfil.rol == 'consulta':
+        return redirect('propiedades_lista')
+    if request.method == 'POST':
+        form = PropiedadForm(request.POST)
+        if form.is_valid():
+            propiedad = form.save()
+            return redirect('propiedad_detalle', pk=propiedad.pk)
+    else:
+        form = PropiedadForm()
+    return render(request, 'core/form_generico.html', {
+        'form': form, 'titulo': 'Nueva Propiedad', 'volver': 'propiedades_lista'
+    })
+
+
+@login_required
+def propiedad_editar(request, pk):
+    from .forms import PropiedadForm
+    propiedad = get_object_or_404(Propiedad, pk=pk)
+    if request.user.perfil.rol == 'consulta':
+        return redirect('propiedad_detalle', pk=pk)
+    if request.method == 'POST':
+        form = PropiedadForm(request.POST, instance=propiedad)
+        if form.is_valid():
+            form.save()
+            return redirect('propiedad_detalle', pk=propiedad.pk)
+    else:
+        form = PropiedadForm(instance=propiedad)
+    return render(request, 'core/form_generico.html', {
+        'form': form, 'titulo': f'Editar — {propiedad.domicilio}', 'volver': 'propiedades_lista'
+    })
+
+
+# ============ SERVICIOS ============
+
+@login_required
+def servicio_agregar(request, propiedad_pk):
+    from .forms import PropiedadServicioForm
+    propiedad = get_object_or_404(Propiedad, pk=propiedad_pk)
+    if request.user.perfil.rol == 'consulta':
+        return redirect('propiedad_detalle', pk=propiedad_pk)
+    if request.method == 'POST':
+        form = PropiedadServicioForm(request.POST)
+        if form.is_valid():
+            ps = form.save(commit=False)
+            ps.propiedad = propiedad
+            ps.save()
+            return redirect('propiedad_detalle', pk=propiedad_pk)
+    else:
+        form = PropiedadServicioForm()
+    return render(request, 'core/form_generico.html', {
+        'form': form,
+        'titulo': f'Agregar Servicio — {propiedad.domicilio}',
+        'volver': 'propiedad_detalle',
+        'volver_pk': propiedad_pk,
+    })
+
+
+# ============ VENCIMIENTOS ============
+
+@login_required
+def vencimiento_crear(request, propiedad_pk=None):
+    from .forms import VencimientoForm
+    if request.user.perfil.rol == 'consulta':
+        return redirect('vencimientos_lista')
+    propiedad = get_object_or_404(Propiedad, pk=propiedad_pk) if propiedad_pk else None
+    if request.method == 'POST':
+        form = VencimientoForm(request.POST, propiedad=propiedad)
+        if form.is_valid():
+            form.save()
+            if propiedad:
+                return redirect('propiedad_detalle', pk=propiedad_pk)
+            return redirect('vencimientos_lista')
+    else:
+        form = VencimientoForm(propiedad=propiedad)
+    return render(request, 'core/form_generico.html', {
+        'form': form,
+        'titulo': 'Nuevo Vencimiento',
+        'volver': 'propiedad_detalle' if propiedad else 'vencimientos_lista',
+        'volver_pk': propiedad_pk,
+    })
+
+
+# ============ TITULARES ============
+
+@login_required
+def titular_agregar(request, propiedad_pk):
+    from .forms import TitularPropiedadForm
+    propiedad = get_object_or_404(Propiedad, pk=propiedad_pk)
+    if request.user.perfil.rol == 'consulta':
+        return redirect('propiedad_detalle', pk=propiedad_pk)
+    if request.method == 'POST':
+        form = TitularPropiedadForm(request.POST)
+        if form.is_valid():
+            tp = form.save(commit=False)
+            tp.propiedad = propiedad
+            tp.save()
+            return redirect('propiedad_detalle', pk=propiedad_pk)
+    else:
+        form = TitularPropiedadForm()
+    return render(request, 'core/form_generico.html', {
+        'form': form,
+        'titulo': f'Agregar Titular — {propiedad.domicilio}',
+        'volver': 'propiedad_detalle',
+        'volver_pk': propiedad_pk,
+    })
