@@ -85,9 +85,11 @@ GOOGLE_DRIVE_FOLDER_ID = os.environ.get('GOOGLE_DRIVE_FOLDER_ID', '')
 import os
 if os.environ.get('DATABASE_URL'):
     import dj_database_url
-    DATABASES['default'] = dj_database_url.parse(os.environ.get('DATABASE_URL'))
+    db_config = dj_database_url.parse(os.environ.get('DATABASE_URL'))
+    DATABASES['default'] = db_config
     SECRET_KEY = os.environ.get('SECRET_KEY', SECRET_KEY)
     DEBUG = os.environ.get('DEBUG', 'False') == 'True'
     allowed = os.environ.get('ALLOWED_HOSTS', '')
     if allowed:
         ALLOWED_HOSTS = allowed.split(',')
+
