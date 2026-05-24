@@ -338,6 +338,8 @@ def titular_agregar(request, propiedad_pk):
         'volver': 'propiedad_detalle',
         'volver_pk': propiedad_pk,
     })
+
+
 # ============ SERVICIOS MAESTRO ============
 
 @login_required
@@ -379,3 +381,27 @@ def servicio_editar(request, pk):
     return render(request, 'core/form_generico.html', {
         'form': form, 'titulo': f'Editar — {servicio.nombre}', 'volver': 'servicios_lista'
     })
+
+
+# ============ ALERTAS ============
+
+@login_required
+def enviar_alertas_view(request):
+    if request.user.perfil.rol != 'admin':
+        return redirect('dashboard')
+    from .alertas import enviar_alertas
+    enviar_alertas()
+    from django.contrib import messages
+    messages.success(request, 'Alertas enviadas correctamente.')
+    return redirect('dashboard')
+# ============ ALERTAS ============
+
+@login_required
+def enviar_alertas_view(request):
+    if request.user.perfil.rol != 'admin':
+        return redirect('dashboard')
+    from .alertas import enviar_alertas
+    enviar_alertas()
+    from django.contrib import messages
+    messages.success(request, 'Alertas enviadas correctamente.')
+    return redirect('dashboard')
