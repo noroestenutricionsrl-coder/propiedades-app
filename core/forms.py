@@ -57,6 +57,7 @@ class PropiedadServicioForm(forms.ModelForm):
             'responsable_pago': forms.Select(attrs={'class': 'form-control'}),
             'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'notas': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'propiedad': forms.Select(attrs={'class': 'form-control'}),
         }
 
 
@@ -70,6 +71,7 @@ class VencimientoForm(forms.ModelForm):
             'importe_estimado': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'placeholder': '0.00'}),
             'periodo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Mayo 2025'}),
             'notas': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'propiedad': forms.Select(attrs={'class': 'form-control'}),
         }
 
     def __init__(self, *args, propiedad=None, **kwargs):
@@ -91,13 +93,14 @@ class InquilinoForm(forms.ModelForm):
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
             'telefono': forms.TextInput(attrs={'class': 'form-control'}),
             'notas': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'propiedad': forms.Select(attrs={'class': 'form-control'}),
         }
 
 
 class ContratoForm(forms.ModelForm):
     class Meta:
         model = Contrato
-        fields = ['inquilino', 'fecha_inicio', 'fecha_fin', 'monto_alquiler', 'moneda', 'ajuste_meses', 'porcentaje_ajuste', 'estado', 'notas']
+        fields = ['propiedad', 'inquilino', 'fecha_inicio', 'fecha_fin', 'monto_alquiler', 'moneda', 'ajuste_meses', 'porcentaje_ajuste', 'estado', 'notas']
         widgets = {
             'inquilino': forms.Select(attrs={'class': 'form-control'}),
             'fecha_inicio': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
@@ -108,7 +111,10 @@ class ContratoForm(forms.ModelForm):
             'porcentaje_ajuste': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'estado': forms.Select(attrs={'class': 'form-control'}),
             'notas': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'propiedad': forms.Select(attrs={'class': 'form-control'}),
         }
+
+
 class ServicioImpuestoForm(forms.ModelForm):
     class Meta:
         model = ServicioImpuesto
