@@ -23,4 +23,6 @@ urlpatterns = [
     path('servicios/', views.servicios_lista, name='servicios_lista'),
     path('servicios/nuevo/', views.servicio_crear, name='servicio_crear'),
     path('servicios/<int:pk>/editar/', views.servicio_editar, name='servicio_editar'),
+    path('alertas/enviar/', views.enviar_alertas_view, name='enviar_alertas'),
 ]
+path('alertas/enviar/', views.enviar_alertas_view, name='enviar_alertas'),
