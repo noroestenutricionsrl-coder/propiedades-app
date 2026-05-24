@@ -1,0 +1,37 @@
+{% extends 'core/base.html' %}
+{% block title %}Propietarios{% endblock %}
+{% block page_title %}Propietarios{% endblock %}
+{% block topbar_actions %}
+{% if request.user.perfil.rol != 'consulta' %}
+<a href="{% url 'propietario_crear' %}" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Nuevo propietario</a>
+{% endif %}
+{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-body">
+  {% if propietarios %}
+  <table>
+    <thead><tr><th>Apellido y nombre</th><th>CUIT</th><th>Email</th><th>Teléfono</th><th>Propiedades</th><th></th></tr></thead>
+    <tbody>
+    {% for p in propietarios %}
+    <tr>
+      <td><strong>{{ p.apellido }}, {{ p.nombre }}</strong></td>
+      <td>{{ p.cuit|default:"—" }}</td>
+      <td>{{ p.email|default:"—" }}</td>
+      <td>{{ p.telefono|default:"—" }}</td>
+      <td>{{ p.propiedades.count }}</td>
+      <td>
+        {% if request.user.perfil.rol != 'consulta' %}
+        <a href="{% url 'propietario_editar' p.pk %}" class="btn btn-secondary btn-sm"><i class="fa-solid fa-pen"></i> Editar</a>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state"><i class="fa-solid fa-user"></i><p>No hay propietarios cargados.</p></div>
+  {% endif %}
+  </div>
+</div>
+{% endblock %}

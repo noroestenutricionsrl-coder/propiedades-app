@@ -3,7 +3,7 @@
 {% block page_title %}Propiedades{% endblock %}
 {% block topbar_actions %}
 {% if request.user.perfil.rol != 'consulta' %}
-<a href="/admin/core/propiedad/add/" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Nueva propiedad</a>
+<a href="{% url 'propiedad_crear' %}" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Nueva propiedad</a>
 {% endif %}
 {% endblock %}
 {% block content %}

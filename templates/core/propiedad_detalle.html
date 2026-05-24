@@ -3,7 +3,7 @@
 {% block page_title %}{{ propiedad.domicilio }}{% endblock %}
 {% block topbar_actions %}
 {% if request.user.perfil.rol != 'consulta' %}
-<a href="/admin/core/propiedad/{{ propiedad.pk }}/change/" class="btn btn-secondary btn-sm"><i class="fa-solid fa-pen"></i> Editar</a>
+<a href="{% url 'propiedad_editar' propiedad.pk %}" class="btn btn-secondary btn-sm"><i class="fa-solid fa-pen"></i> Editar</a>
 {% endif %}
 {% endblock %}
 {% block content %}
@@ -22,7 +22,12 @@
   </div>
   <!-- Titulares -->
   <div class="card">
-    <div class="card-header"><span class="card-title">Titulares</span></div>
+    <div class="card-header">
+    <span class="card-title">Titulares</span>
+    {% if request.user.perfil.rol != 'consulta' %}
+    <a href="{% url 'titular_agregar' propiedad.pk %}" class="btn btn-secondary btn-sm"><i class="fa-solid fa-plus"></i> Agregar</a>
+    {% endif %}
+  </div>
     <div class="card-body" style="padding:20px">
       {% for tp in propiedad.titularpropiedad_set.all %}
       <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0f4f1">
@@ -40,7 +45,7 @@
   <div class="card-header">
     <span class="card-title"><i class="fa-solid fa-bolt"></i> Servicios e Impuestos</span>
     {% if request.user.perfil.rol != 'consulta' %}
-    <a href="/admin/core/propiedadservicio/add/" class="btn btn-secondary btn-sm"><i class="fa-solid fa-plus"></i> Agregar</a>
+    <a href="{% url 'servicio_agregar' propiedad.pk %}" class="btn btn-secondary btn-sm"><i class="fa-solid fa-plus"></i> Agregar servicio</a>
     {% endif %}
   </div>
   <div class="card-body">
@@ -98,7 +103,10 @@
 <div class="card">
   <div class="card-header">
     <span class="card-title"><i class="fa-solid fa-history"></i> Historial de Vencimientos</span>
+    <div style="display:flex;gap:8px">
+    <a href="{% url 'vencimiento_crear_propiedad' propiedad.pk %}" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Nuevo</a>
     <a href="{% url 'vencimientos_lista' %}?propiedad={{ propiedad.pk }}" class="btn btn-secondary btn-sm">Ver todos</a>
+  </div>
   </div>
   <div class="card-body">
     {% if vencimientos %}
