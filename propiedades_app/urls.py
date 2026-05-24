@@ -7,13 +7,9 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('', views.dashboard, name='dashboard'),
-
-    # Propietarios
     path('propietarios/', views.propietarios_lista, name='propietarios_lista'),
     path('propietarios/nuevo/', views.propietario_crear, name='propietario_crear'),
     path('propietarios/<int:pk>/editar/', views.propietario_editar, name='propietario_editar'),
-
-    # Propiedades
     path('propiedades/', views.propiedades_lista, name='propiedades_lista'),
     path('propiedades/nueva/', views.propiedad_crear, name='propiedad_crear'),
     path('propiedades/<int:pk>/', views.propiedad_detalle, name='propiedad_detalle'),
@@ -21,9 +17,10 @@ urlpatterns = [
     path('propiedades/<int:propiedad_pk>/servicio/', views.servicio_agregar, name='servicio_agregar'),
     path('propiedades/<int:propiedad_pk>/titular/', views.titular_agregar, name='titular_agregar'),
     path('propiedades/<int:propiedad_pk>/vencimiento/', views.vencimiento_crear, name='vencimiento_crear_propiedad'),
-
-    # Vencimientos
     path('vencimientos/', views.vencimientos_lista, name='vencimientos_lista'),
     path('vencimientos/nuevo/', views.vencimiento_crear, name='vencimiento_crear'),
     path('vencimientos/<int:vencimiento_id>/pagar/', views.registrar_pago, name='registrar_pago'),
+    path('servicios/', views.servicios_lista, name='servicios_lista'),
+    path('servicios/nuevo/', views.servicio_crear, name='servicio_crear'),
+    path('servicios/<int:pk>/editar/', views.servicio_editar, name='servicio_editar'),
 ]
