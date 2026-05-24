@@ -1,0 +1,52 @@
+{% extends 'core/base.html' %}
+{% block title %}Servicios e Impuestos{% endblock %}
+{% block page_title %}Servicios e Impuestos{% endblock %}
+{% block topbar_actions %}
+{% if request.user.perfil.rol == 'admin' %}
+<a href="{% url 'servicio_crear' %}" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Nuevo servicio</a>
+{% endif %}
+{% endblock %}
+{% block content %}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+  <div class="card">
+    <div class="card-header"><span class="card-title"><i class="fa-solid fa-bolt"></i> Servicios</span></div>
+    <div class="card-body">
+      <table>
+        <thead><tr><th>Nombre</th><th></th></tr></thead>
+        <tbody>
+        {% for s in servicios %}{% if s.tipo == 'servicio' %}
+        <tr>
+          <td>{{ s.nombre }}</td>
+          <td>
+            {% if request.user.perfil.rol == 'admin' %}
+            <a href="{% url 'servicio_editar' s.pk %}" class="btn btn-secondary btn-sm"><i class="fa-solid fa-pen"></i></a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endif %}{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-title"><i class="fa-solid fa-file-invoice-dollar"></i> Impuestos</span></div>
+    <div class="card-body">
+      <table>
+        <thead><tr><th>Nombre</th><th></th></tr></thead>
+        <tbody>
+        {% for s in servicios %}{% if s.tipo == 'impuesto' %}
+        <tr>
+          <td>{{ s.nombre }}</td>
+          <td>
+            {% if request.user.perfil.rol == 'admin' %}
+            <a href="{% url 'servicio_editar' s.pk %}" class="btn btn-secondary btn-sm"><i class="fa-solid fa-pen"></i></a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endif %}{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

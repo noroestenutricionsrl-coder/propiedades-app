@@ -346,8 +346,8 @@ tr:hover td { background: #fafcfb; }
     </a>
     {% if request.user.perfil.rol == 'admin' %}
     <div class="nav-section">Sistema</div>
-    <a href="/admin/" class="nav-item">
-      <i class="fa-solid fa-gear"></i> Administración
+    <a href="{% url 'servicios_lista' %}" class="nav-item {% if 'servicio' in request.resolver_match.url_name %}active{% endif %}">
+      <i class="fa-solid fa-bolt"></i> Servicios / Impuestos
     </a>
     {% endif %}
   </nav>
