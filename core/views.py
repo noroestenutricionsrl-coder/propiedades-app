@@ -394,14 +394,121 @@ def enviar_alertas_view(request):
     from django.contrib import messages
     messages.success(request, 'Alertas enviadas correctamente.')
     return redirect('dashboard')
-# ============ ALERTAS ============
+
+
+# ============ INQUILINOS ============
 
 @login_required
-def enviar_alertas_view(request):
-    if request.user.perfil.rol != 'admin':
-        return redirect('dashboard')
-    from .alertas import enviar_alertas
-    enviar_alertas()
-    from django.contrib import messages
-    messages.success(request, 'Alertas enviadas correctamente.')
-    return redirect('dashboard')
+def inquilinos_lista(request):
+    inquilinos = Inquilino.objects.all().order_by('apellido', 'nombre')
+    return render(request, 'core/inquilinos_lista.html', {'inquilinos': inquilinos})
+
+
+@login_required
+def inquilino_crear(request):
+    from .forms import InquilinoForm
+    if request.user.perfil.rol == 'consulta':
+        return redirect('inquilinos_lista')
+    if request.method == 'POST':
+        form = InquilinoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('inquilinos_lista')
+    else:
+        form = InquilinoForm()
+    return render(request, 'core/form_generico.html', {
+        'form': form, 'titulo': 'Nuevo Inquilino', 'volver': 'inquilinos_lista'
+    })
+
+
+@login_required
+def inquilino_editar(request, pk):
+    from .forms import InquilinoForm
+    inquilino = get_object_or_404(Inquilino, pk=pk)
+    if request.user.perfil.rol == 'consulta':
+        return redirect('inquilinos_lista')
+    if request.method == 'POST':
+        form = InquilinoForm(request.POST, instance=inquilino)
+        if form.is_valid():
+            form.save()
+            return redirect('inquilinos_lista')
+    else:
+        form = InquilinoForm(instance=inquilino)
+    return render(request, 'core/form_generico.html', {
+        'form': form, 'titulo': f'Editar — {inquilino}', 'volver': 'inquilinos_lista'
+    })
+
+
+# ============ CONTRATOS ============
+
+@login_required
+def contratos_lista(request):
+    contratos = Contrato.objects.select_related(
+        'propiedad', 'inquilino'
+    ).all().order_by('-fecha_inicio')
+    estado = request.GET.get('estado', '')
+    if estado:
+        contratos = contratos.filter(estado=estado)
+    return render(request, 'core/contratos_lista.html', {
+        'contratos': contratos,
+        'estado_filtro': estado,
+    })
+
+
+@login_required
+def contrato_crear(request, propiedad_pk=None):
+    from .forms import ContratoForm
+    if request.user.perfil.rol == 'consulta':
+        return redirect('contratos_lista')
+    propiedad = get_object_or_404(Propiedad, pk=propiedad_pk) if propiedad_pk else None
+    if request.method == 'POST':
+        form = ContratoForm(request.POST)
+        if form.is_valid():
+            contrato = form.save(commit=False)
+            if propiedad:
+                contrato.propiedad = propiedad
+            contrato.save()
+            # Actualizar estado de la propiedad a alquilada
+            if contrato.estado == 'activo':
+                contrato.propiedad.estado = 'alquilada'
+                contrato.propiedad.save()
+            if propiedad:
+                return redirect('propiedad_detalle', pk=propiedad_pk)
+            return redirect('contratos_lista')
+    else:
+        initial = {}
+        if propiedad:
+            initial['propiedad'] = propiedad
+        form = ContratoForm(initial=initial)
+        if propiedad:
+            form.fields['propiedad'].initial = propiedad
+            form.fields['propiedad'].widget.attrs['readonly'] = True
+    return render(request, 'core/form_generico.html', {
+        'form': form,
+        'titulo': f'Nuevo Contrato{" — " + propiedad.domicilio if propiedad else ""}',
+        'volver': 'propiedad_detalle' if propiedad else 'contratos_lista',
+        'volver_pk': propiedad_pk,
+    })
+
+
+@login_required
+def contrato_editar(request, pk):
+    from .forms import ContratoForm
+    contrato = get_object_or_404(Contrato, pk=pk)
+    if request.user.perfil.rol == 'consulta':
+        return redirect('contratos_lista')
+    if request.method == 'POST':
+        form = ContratoForm(request.POST, instance=contrato)
+        if form.is_valid():
+            contrato = form.save()
+            if contrato.estado == 'activo':
+                contrato.propiedad.estado = 'alquilada'
+            else:
+                contrato.propiedad.estado = 'disponible'
+            contrato.propiedad.save()
+            return redirect('contratos_lista')
+    else:
+        form = ContratoForm(instance=contrato)
+    return render(request, 'core/form_generico.html', {
+        'form': form, 'titulo': f'Editar contrato — {contrato.propiedad}', 'volver': 'contratos_lista'
+    })

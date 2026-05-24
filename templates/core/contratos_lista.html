@@ -1,0 +1,59 @@
+{% extends 'core/base.html' %}
+{% block title %}Contratos{% endblock %}
+{% block page_title %}Contratos{% endblock %}
+{% block topbar_actions %}
+{% if request.user.perfil.rol != 'consulta' %}
+<a href="{% url 'contrato_crear' %}" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Nuevo contrato</a>
+{% endif %}
+{% endblock %}
+{% block content %}
+<div class="filtros">
+  <form method="get" style="display:flex;gap:10px;align-items:center">
+    <select name="estado">
+      <option value="">Todos los estados</option>
+      <option value="activo" {% if estado_filtro == 'activo' %}selected{% endif %}>Activo</option>
+      <option value="vencido" {% if estado_filtro == 'vencido' %}selected{% endif %}>Vencido</option>
+      <option value="rescindido" {% if estado_filtro == 'rescindido' %}selected{% endif %}>Rescindido</option>
+    </select>
+    <button type="submit" class="btn btn-secondary btn-sm"><i class="fa-solid fa-search"></i> Filtrar</button>
+  </form>
+</div>
+<div class="card">
+  <div class="card-body">
+  {% if contratos %}
+  <table>
+    <thead>
+      <tr>
+        <th>Propiedad</th>
+        <th>Inquilino</th>
+        <th>Inicio</th>
+        <th>Fin</th>
+        <th>Alquiler</th>
+        <th>Estado</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for c in contratos %}
+    <tr>
+      <td><a href="{% url 'propiedad_detalle' c.propiedad.pk %}" style="color:#1a5c3a;text-decoration:none;font-weight:500">{{ c.propiedad.domicilio }}</a></td>
+      <td>{{ c.inquilino }}</td>
+      <td>{{ c.fecha_inicio|date:"d/m/Y" }}</td>
+      <td>{{ c.fecha_fin|date:"d/m/Y" }}</td>
+      <td>{{ c.moneda }} ${{ c.monto_alquiler|floatformat:0 }}</td>
+      <td><span class="badge badge-{{ c.estado }}">{{ c.get_estado_display }}</span></td>
+      <td>
+        {% if request.user.perfil.rol != 'consulta' %}
+        <a href="{% url 'contrato_editar' c.pk %}" class="btn btn-secondary btn-sm"><i class="fa-solid fa-pen"></i></a>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state"><i class="fa-solid fa-file-contract"></i><p>No hay contratos cargados.</p></div>
+  {% endif %}
+  </div>
+</div>
+{% endblock %}

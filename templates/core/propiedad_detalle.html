@@ -79,7 +79,12 @@
 <!-- Contratos -->
 {% if contratos %}
 <div class="card" style="margin-bottom:24px">
-  <div class="card-header"><span class="card-title"><i class="fa-solid fa-file-contract"></i> Contratos</span></div>
+  <div class="card-header">
+    <span class="card-title"><i class="fa-solid fa-file-contract"></i> Contratos</span>
+    {% if request.user.perfil.rol != 'consulta' %}
+    <a href="{% url 'contrato_crear_propiedad' propiedad.pk %}" class="btn btn-secondary btn-sm"><i class="fa-solid fa-plus"></i> Nuevo</a>
+    {% endif %}
+  </div>
   <div class="card-body">
     <table>
       <thead><tr><th>Inquilino</th><th>Desde</th><th>Hasta</th><th>Alquiler</th><th>Estado</th></tr></thead>

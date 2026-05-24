@@ -337,7 +337,10 @@ tr:hover td { background: #fafcfb; }
     <a href="{% url 'propietarios_lista' %}" class="nav-item {% if 'propietario' in request.resolver_match.url_name %}active{% endif %}">
       <i class="fa-solid fa-user-tie"></i> Propietarios
     </a>
-    <a href="#" class="nav-item">
+    <a href="{% url 'inquilinos_lista' %}" class="nav-item {% if 'inquilino' in request.resolver_match.url_name %}active{% endif %}">
+      <i class="fa-solid fa-person"></i> Inquilinos
+    </a>
+    <a href="{% url 'contratos_lista' %}" class="nav-item {% if 'contrato' in request.resolver_match.url_name %}active{% endif %}">
       <i class="fa-solid fa-file-contract"></i> Contratos
     </a>
     <div class="nav-section">Reportes</div>
