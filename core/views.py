@@ -338,3 +338,44 @@ def titular_agregar(request, propiedad_pk):
         'volver': 'propiedad_detalle',
         'volver_pk': propiedad_pk,
     })
+# ============ SERVICIOS MAESTRO ============
+
+@login_required
+def servicios_lista(request):
+    servicios = ServicioImpuesto.objects.all().order_by('tipo', 'nombre')
+    return render(request, 'core/servicios_lista.html', {'servicios': servicios})
+
+
+@login_required
+def servicio_crear(request):
+    from .forms import ServicioImpuestoForm
+    if request.user.perfil.rol != 'admin':
+        return redirect('servicios_lista')
+    if request.method == 'POST':
+        form = ServicioImpuestoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('servicios_lista')
+    else:
+        form = ServicioImpuestoForm()
+    return render(request, 'core/form_generico.html', {
+        'form': form, 'titulo': 'Nuevo Servicio / Impuesto', 'volver': 'servicios_lista'
+    })
+
+
+@login_required
+def servicio_editar(request, pk):
+    from .forms import ServicioImpuestoForm
+    servicio = get_object_or_404(ServicioImpuesto, pk=pk)
+    if request.user.perfil.rol != 'admin':
+        return redirect('servicios_lista')
+    if request.method == 'POST':
+        form = ServicioImpuestoForm(request.POST, instance=servicio)
+        if form.is_valid():
+            form.save()
+            return redirect('servicios_lista')
+    else:
+        form = ServicioImpuestoForm(instance=servicio)
+    return render(request, 'core/form_generico.html', {
+        'form': form, 'titulo': f'Editar — {servicio.nombre}', 'volver': 'servicios_lista'
+    })

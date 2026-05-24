@@ -109,3 +109,11 @@ class ContratoForm(forms.ModelForm):
             'estado': forms.Select(attrs={'class': 'form-control'}),
             'notas': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
         }
+class ServicioImpuestoForm(forms.ModelForm):
+    class Meta:
+        model = ServicioImpuesto
+        fields = ['nombre', 'tipo']
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Luz (EDET)'}),
+            'tipo': forms.Select(attrs={'class': 'form-control'}),
+        }
