@@ -9,10 +9,17 @@ if not User.objects.filter(username='admin').exists():
     u = User.objects.create_superuser('admin', 'noroestenutricionsrl@gmail.com', 'Admin2025!')
     u.first_name = 'Daniela'
     u.save()
-    PerfilUsuario.objects.create(usuario=u, rol='admin', dias_anticipacion=7)
+    PerfilUsuario.objects.create(usuario=u, rol='admin', dias_anticipacion=7, notif_email=True)
     print('Usuario admin creado')
 else:
-    print('Ya existe')
+    u = User.objects.get(username='admin')
+    u.email = 'noroestenutricionsrl@gmail.com'
+    u.save()
+    perfil, _ = PerfilUsuario.objects.get_or_create(usuario=u)
+    perfil.notif_email = True
+    perfil.rol = 'admin'
+    perfil.save()
+    print('Usuario admin actualizado')
 
 servicios = [
     ('Luz (EDET)', 'servicio'),
