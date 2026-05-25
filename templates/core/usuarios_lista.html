@@ -1,0 +1,54 @@
+{% extends 'core/base.html' %}
+{% block title %}Usuarios{% endblock %}
+{% block page_title %}Usuarios del Sistema{% endblock %}
+{% block topbar_actions %}
+<a href="{% url 'usuario_crear' %}" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Nuevo usuario</a>
+{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-body">
+  {% if usuarios %}
+  <table>
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Usuario</th>
+        <th>Email</th>
+        <th>Rol</th>
+        <th>Notif. email</th>
+        <th>Días anticip.</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for u in usuarios %}
+    <tr>
+      <td><strong>{{ u.get_full_name|default:u.username }}</strong></td>
+      <td><code style="background:#f0f4f1;padding:2px 8px;border-radius:4px;font-size:0.8rem">{{ u.username }}</code></td>
+      <td>{{ u.email|default:"—" }}</td>
+      <td>
+        {% if u.perfil %}
+        <span class="badge {% if u.perfil.rol == 'admin' %}badge-pagado{% elif u.perfil.rol == 'operador' %}badge-pendiente{% else %}badge-disponible{% endif %}">
+          {{ u.perfil.get_rol_display }}
+        </span>
+        {% else %}—{% endif %}
+      </td>
+      <td>
+        {% if u.perfil and u.perfil.notif_email %}
+        <span style="color:#1a5c3a"><i class="fa-solid fa-check"></i></span>
+        {% else %}
+        <span style="color:#ccc"><i class="fa-solid fa-xmark"></i></span>
+        {% endif %}
+      </td>
+      <td>{{ u.perfil.dias_anticipacion|default:"7" }} días</td>
+      <td><a href="{% url 'usuario_editar' u.pk %}" class="btn btn-secondary btn-sm"><i class="fa-solid fa-pen"></i> Editar</a></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state"><i class="fa-solid fa-users"></i><p>No hay usuarios cargados.</p></div>
+  {% endif %}
+  </div>
+</div>
+{% endblock %}

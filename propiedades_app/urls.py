@@ -32,4 +32,7 @@ urlpatterns = [
     path('contratos/<int:pk>/editar/', views.contrato_editar, name='contrato_editar'),
     path('alertas/enviar/', views.enviar_alertas_view, name='enviar_alertas'),
     path('exportar/', views.exportar_excel, name='exportar_excel'),
+    path('usuarios/', views.usuarios_lista, name='usuarios_lista'),
+    path('usuarios/nuevo/', views.usuario_crear, name='usuario_crear'),
+    path('usuarios/<int:pk>/editar/', views.usuario_editar, name='usuario_editar'),
 ]

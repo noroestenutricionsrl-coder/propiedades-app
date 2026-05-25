@@ -352,6 +352,9 @@ tr:hover td { background: #fafcfb; }
     <a href="{% url 'servicios_lista' %}" class="nav-item {% if 'servicio' in request.resolver_match.url_name %}active{% endif %}">
       <i class="fa-solid fa-bolt"></i> Servicios / Impuestos
     </a>
+    <a href="{% url 'usuarios_lista' %}" class="nav-item {% if 'usuario' in request.resolver_match.url_name %}active{% endif %}">
+      <i class="fa-solid fa-users"></i> Usuarios
+    </a>
     {% endif %}
   </nav>
   <div class="sidebar-footer">

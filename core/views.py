@@ -536,7 +536,7 @@ def exportar_excel(request):
             open(ruta, 'rb'),
             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
-        response['Content-Disposition'] = f'attachment; filename="{nombre}"'
+        response['Content-Disposition'] = f'attachment; filename={nombre}'
         os.unlink(ruta)
         return response
     
@@ -544,4 +544,86 @@ def exportar_excel(request):
         'mes': mes,
         'anio': anio,
         'meses': [(i, date(2000, i, 1).strftime('%B').capitalize()) for i in range(1, 13)],
+    })
+
+
+# ============ USUARIOS ============
+
+@login_required
+def usuarios_lista(request):
+    if request.user.perfil.rol != 'admin':
+        return redirect('dashboard')
+    usuarios = User.objects.select_related('perfil').all().order_by('first_name', 'last_name')
+    return render(request, 'core/usuarios_lista.html', {'usuarios': usuarios})
+
+
+@login_required
+def usuario_crear(request):
+    if request.user.perfil.rol != 'admin':
+        return redirect('dashboard')
+    error = None
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        rol = request.POST.get('rol', 'consulta')
+        notif_email = request.POST.get('notif_email') == 'on'
+        dias = int(request.POST.get('dias_anticipacion', 7))
+
+        if User.objects.filter(username=username).exists():
+            error = "Ese nombre de usuario ya existe."
+        else:
+            u = User.objects.create_user(username, email, password)
+            u.first_name = first_name
+            u.last_name = last_name
+            u.save()
+            PerfilUsuario.objects.create(
+                usuario=u, rol=rol,
+                notif_email=notif_email,
+                dias_anticipacion=dias
+            )
+            return redirect('usuarios_lista')
+
+    return render(request, 'core/usuario_form.html', {
+        'titulo': 'Nuevo Usuario',
+        'error': error,
+        'accion': 'crear',
+    })
+
+
+@login_required
+def usuario_editar(request, pk):
+    if request.user.perfil.rol != 'admin':
+        return redirect('dashboard')
+    usuario = get_object_or_404(User, pk=pk)
+    perfil = getattr(usuario, 'perfil', None)
+    error = None
+
+    if request.method == 'POST':
+        usuario.first_name = request.POST.get('first_name')
+        usuario.last_name = request.POST.get('last_name')
+        usuario.email = request.POST.get('email')
+        usuario.save()
+
+        if perfil:
+            perfil.rol = request.POST.get('rol', 'consulta')
+            perfil.notif_email = request.POST.get('notif_email') == 'on'
+            perfil.dias_anticipacion = int(request.POST.get('dias_anticipacion', 7))
+            perfil.save()
+
+        nueva_password = request.POST.get('password')
+        if nueva_password:
+            usuario.set_password(nueva_password)
+            usuario.save()
+
+        return redirect('usuarios_lista')
+
+    return render(request, 'core/usuario_form.html', {
+        'titulo': f'Editar — {usuario.get_full_name() or usuario.username}',
+        'usuario': usuario,
+        'perfil': perfil,
+        'accion': 'editar',
+        'error': error,
     })
