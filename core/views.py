@@ -521,29 +521,26 @@ def exportar_excel(request):
     if request.user.perfil.rol == 'consulta':
         return redirect('dashboard')
     
-    from .exportar import exportar_vencimientos_excel, subir_a_drive
-    from django.contrib import messages
+    from .exportar import exportar_vencimientos_excel
+    from django.http import FileResponse
     from datetime import date
+    import os
     
     hoy = date.today()
     mes = int(request.GET.get('mes', hoy.month))
     anio = int(request.GET.get('anio', hoy.year))
     
-    # Generar Excel
-    ruta, nombre = exportar_vencimientos_excel(mes, anio)
-    
-    # Subir a Drive
-    link, error = subir_a_drive(ruta, nombre)
-    
-    if error:
-        messages.error(request, f'Error al subir a Drive: {error}')
-    else:
-        messages.success(request, f'Archivo subido a Google Drive: {nombre}')
+    if request.GET.get('descargar'):
+        ruta, nombre = exportar_vencimientos_excel(mes, anio)
+        response = FileResponse(
+            open(ruta, 'rb'),
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = f'attachment; filename="{nombre}"'
+        os.unlink(ruta)
+        return response
     
     return render(request, 'core/exportar.html', {
-        'link': link,
-        'error': error,
-        'nombre': nombre,
         'mes': mes,
         'anio': anio,
         'meses': [(i, date(2000, i, 1).strftime('%B').capitalize()) for i in range(1, 13)],
