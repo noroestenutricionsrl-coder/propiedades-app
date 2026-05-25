@@ -512,3 +512,39 @@ def contrato_editar(request, pk):
     return render(request, 'core/form_generico.html', {
         'form': form, 'titulo': f'Editar contrato — {contrato.propiedad}', 'volver': 'contratos_lista'
     })
+
+
+# ============ EXPORTACIÓN ============
+
+@login_required
+def exportar_excel(request):
+    if request.user.perfil.rol == 'consulta':
+        return redirect('dashboard')
+    
+    from .exportar import exportar_vencimientos_excel, subir_a_drive
+    from django.contrib import messages
+    from datetime import date
+    
+    hoy = date.today()
+    mes = int(request.GET.get('mes', hoy.month))
+    anio = int(request.GET.get('anio', hoy.year))
+    
+    # Generar Excel
+    ruta, nombre = exportar_vencimientos_excel(mes, anio)
+    
+    # Subir a Drive
+    link, error = subir_a_drive(ruta, nombre)
+    
+    if error:
+        messages.error(request, f'Error al subir a Drive: {error}')
+    else:
+        messages.success(request, f'Archivo subido a Google Drive: {nombre}')
+    
+    return render(request, 'core/exportar.html', {
+        'link': link,
+        'error': error,
+        'nombre': nombre,
+        'mes': mes,
+        'anio': anio,
+        'meses': [(i, date(2000, i, 1).strftime('%B').capitalize()) for i in range(1, 13)],
+    })

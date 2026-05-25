@@ -1,0 +1,44 @@
+{% extends 'core/base.html' %}
+{% block title %}Exportar Excel{% endblock %}
+{% block page_title %}Exportar a Excel{% endblock %}
+{% block content %}
+<div style="max-width:600px">
+  <div class="card">
+    <div class="card-header"><span class="card-title"><i class="fa-solid fa-file-excel"></i> Exportar vencimientos</span></div>
+    <div class="card-body" style="padding:24px">
+      <form method="get" style="display:flex;gap:12px;align-items:flex-end;margin-bottom:20px">
+        <div class="form-group" style="margin:0;flex:1">
+          <label class="form-label">Mes</label>
+          <select name="mes" class="form-control">
+            {% for num, nombre in meses %}
+            <option value="{{ num }}" {% if mes == num %}selected{% endif %}>{{ nombre }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group" style="margin:0;width:100px">
+          <label class="form-label">Año</label>
+          <input type="number" name="anio" class="form-control" value="{{ anio }}">
+        </div>
+        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-upload"></i> Exportar y subir a Drive</button>
+      </form>
+
+      {% if link %}
+      <div style="background:#e8f5ee;border-left:4px solid #1a5c3a;padding:16px;border-radius:8px">
+        <div style="font-weight:600;color:#1a5c3a;margin-bottom:8px"><i class="fa-solid fa-check-circle"></i> Archivo subido exitosamente</div>
+        <div style="font-size:0.875rem;color:#5a7060;margin-bottom:12px">{{ nombre }}</div>
+        <a href="{{ link }}" target="_blank" class="btn btn-primary btn-sm">
+          <i class="fa-brands fa-google-drive"></i> Abrir en Google Drive
+        </a>
+      </div>
+      {% endif %}
+
+      {% if error %}
+      <div style="background:#fdecea;border-left:4px solid #c0392b;padding:16px;border-radius:8px">
+        <div style="font-weight:600;color:#c0392b;margin-bottom:4px"><i class="fa-solid fa-circle-exclamation"></i> Error</div>
+        <div style="font-size:0.875rem">{{ error }}</div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -344,7 +344,7 @@ tr:hover td { background: #fafcfb; }
       <i class="fa-solid fa-file-contract"></i> Contratos
     </a>
     <div class="nav-section">Reportes</div>
-    <a href="#" class="nav-item">
+    <a href="{% url 'exportar_excel' %}" class="nav-item {% if 'exportar' in request.resolver_match.url_name %}active{% endif %}">
       <i class="fa-solid fa-file-excel"></i> Exportar Excel
     </a>
     {% if request.user.perfil.rol == 'admin' %}
