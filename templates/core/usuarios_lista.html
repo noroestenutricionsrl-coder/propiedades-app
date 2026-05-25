@@ -41,7 +41,12 @@
         {% endif %}
       </td>
       <td>{{ u.perfil.dias_anticipacion|default:"7" }} días</td>
-      <td><a href="{% url 'usuario_editar' u.pk %}" class="btn btn-secondary btn-sm"><i class="fa-solid fa-pen"></i> Editar</a></td>
+      <td style="display:flex;gap:6px">
+        <a href="{% url 'usuario_editar' u.pk %}" class="btn btn-secondary btn-sm"><i class="fa-solid fa-pen"></i> Editar</a>
+        {% if u != request.user %}
+        <a href="{% url 'usuario_eliminar' u.pk %}" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></a>
+        {% endif %}
+      </td>
     </tr>
     {% endfor %}
     </tbody>

@@ -627,3 +627,16 @@ def usuario_editar(request, pk):
         'accion': 'editar',
         'error': error,
     })
+
+
+@login_required
+def usuario_eliminar(request, pk):
+    if request.user.perfil.rol != 'admin':
+        return redirect('dashboard')
+    usuario = get_object_or_404(User, pk=pk)
+    if usuario == request.user:
+        return redirect('usuarios_lista')  # No puede eliminarse a sí mismo
+    if request.method == 'POST':
+        usuario.delete()
+        return redirect('usuarios_lista')
+    return render(request, 'core/usuario_confirmar_eliminar.html', {'usuario': usuario})
