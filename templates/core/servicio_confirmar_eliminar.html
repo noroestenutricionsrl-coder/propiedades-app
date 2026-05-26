@@ -1,0 +1,22 @@
+{% extends 'core/base.html' %}
+{% block title %}Eliminar Servicio{% endblock %}
+{% block page_title %}Eliminar Servicio{% endblock %}
+{% block content %}
+<div style="max-width:480px">
+  <div class="card" style="border-left:4px solid #c0392b">
+    <div class="card-body" style="padding:28px">
+      <p style="font-size:1rem;margin-bottom:12px">
+        ¿Estás segura de que querés eliminar <strong>{{ servicio.nombre }}</strong>?
+      </p>
+      <p style="color:#c0392b;font-size:0.875rem;margin-bottom:24px">
+        <i class="fa-solid fa-triangle-exclamation"></i> Si este servicio está asignado a alguna propiedad, no podrá eliminarse.
+      </p>
+      <form method="post" style="display:flex;gap:10px">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger"><i class="fa-solid fa-trash"></i> Sí, eliminar</button>
+        <a href="{% url 'servicios_lista' %}" class="btn btn-secondary">Cancelar</a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

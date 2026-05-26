@@ -678,3 +678,14 @@ def pagos_lista(request):
         'total': total,
         'meses': [(i, date(2000, i, 1).strftime('%B').capitalize()) for i in range(1, 13)],
     })
+
+
+@login_required
+def servicio_eliminar(request, pk):
+    if request.user.perfil.rol != 'admin':
+        return redirect('servicios_lista')
+    servicio = get_object_or_404(ServicioImpuesto, pk=pk)
+    if request.method == 'POST':
+        servicio.delete()
+        return redirect('servicios_lista')
+    return render(request, 'core/servicio_confirmar_eliminar.html', {'servicio': servicio})

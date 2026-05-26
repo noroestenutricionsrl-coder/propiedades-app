@@ -20,6 +20,7 @@
           <td>
             {% if request.user.perfil.rol == 'admin' %}
             <a href="{% url 'servicio_editar' s.pk %}" class="btn btn-secondary btn-sm"><i class="fa-solid fa-pen"></i></a>
+            <a href="{% url 'servicio_eliminar' s.pk %}" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></a>
             {% endif %}
           </td>
         </tr>
@@ -40,6 +41,7 @@
           <td>
             {% if request.user.perfil.rol == 'admin' %}
             <a href="{% url 'servicio_editar' s.pk %}" class="btn btn-secondary btn-sm"><i class="fa-solid fa-pen"></i></a>
+            <a href="{% url 'servicio_eliminar' s.pk %}" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></a>
             {% endif %}
           </td>
         </tr>
