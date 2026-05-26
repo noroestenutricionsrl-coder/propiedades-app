@@ -30,6 +30,7 @@ urlpatterns = [
     path('contratos/', views.contratos_lista, name='contratos_lista'),
     path('contratos/nuevo/', views.contrato_crear, name='contrato_crear'),
     path('contratos/<int:pk>/editar/', views.contrato_editar, name='contrato_editar'),
+    path('pagos/', views.pagos_lista, name='pagos_lista'),
     path('alertas/enviar/', views.enviar_alertas_view, name='enviar_alertas'),
     path('exportar/', views.exportar_excel, name='exportar_excel'),
     path('usuarios/', views.usuarios_lista, name='usuarios_lista'),

@@ -640,3 +640,41 @@ def usuario_eliminar(request, pk):
         usuario.delete()
         return redirect('usuarios_lista')
     return render(request, 'core/usuario_confirmar_eliminar.html', {'usuario': usuario})
+
+
+# ============ PAGOS ============
+
+@login_required
+def pagos_lista(request):
+    from datetime import date
+    hoy = date.today()
+    mes = int(request.GET.get('mes', hoy.month))
+    anio = int(request.GET.get('anio', hoy.year))
+    propiedad_id = request.GET.get('propiedad', '')
+
+    pagos = Pago.objects.select_related(
+        'vencimiento__propiedad_servicio__propiedad',
+        'vencimiento__propiedad_servicio__servicio',
+        'registrado_por'
+    ).filter(
+        fecha_pago__year=anio,
+        fecha_pago__month=mes
+    )
+
+    if propiedad_id:
+        pagos = pagos.filter(vencimiento__propiedad_servicio__propiedad_id=propiedad_id)
+
+    pagos = pagos.order_by('-fecha_pago')
+    propiedades = Propiedad.objects.all()
+
+    total = sum(p.importe_pagado for p in pagos)
+
+    return render(request, 'core/pagos_lista.html', {
+        'pagos': pagos,
+        'mes': mes,
+        'anio': anio,
+        'propiedad_filtro': propiedad_id,
+        'propiedades': propiedades,
+        'total': total,
+        'meses': [(i, date(2000, i, 1).strftime('%B').capitalize()) for i in range(1, 13)],
+    })
