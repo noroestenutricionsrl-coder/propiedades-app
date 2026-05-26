@@ -46,7 +46,12 @@
       <td><code style="font-size:0.8rem;background:#f0f4f1;padding:2px 6px;border-radius:4px">{{ p.padron_municipal|default:"—" }}</code></td>
       <td><span class="badge badge-{{ p.estado }}">{{ p.get_estado_display }}</span></td>
       <td style="color:#5a7060;font-size:0.82rem">{{ p.servicios.count }} servicio{{ p.servicios.count|pluralize:"s" }}</td>
-      <td><a href="{% url 'propiedad_detalle' p.pk %}" class="btn btn-secondary btn-sm"><i class="fa-solid fa-eye"></i> Ver</a></td>
+      <td style="display:flex;gap:6px">
+          <a href="{% url 'propiedad_detalle' p.pk %}" class="btn btn-secondary btn-sm"><i class="fa-solid fa-eye"></i> Ver</a>
+          {% if request.user.perfil.rol != 'consulta' %}
+          <a href="{% url 'propiedad_eliminar' p.pk %}" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></a>
+          {% endif %}
+        </td>
     </tr>
     {% endfor %}
     </tbody>

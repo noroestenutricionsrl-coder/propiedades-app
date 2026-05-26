@@ -45,6 +45,7 @@
       <td>
         {% if request.user.perfil.rol != 'consulta' %}
         <a href="{% url 'contrato_editar' c.pk %}" class="btn btn-secondary btn-sm"><i class="fa-solid fa-pen"></i></a>
+          <a href="{% url 'contrato_eliminar' c.pk %}" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></a>
         {% endif %}
       </td>
     </tr>

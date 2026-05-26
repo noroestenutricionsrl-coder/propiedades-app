@@ -689,3 +689,84 @@ def servicio_eliminar(request, pk):
         servicio.delete()
         return redirect('servicios_lista')
     return render(request, 'core/servicio_confirmar_eliminar.html', {'servicio': servicio})
+
+
+# ============ ELIMINAR PROPIEDADES, INQUILINOS, VENCIMIENTOS, CONTRATOS ============
+
+@login_required
+def propiedad_eliminar(request, pk):
+    if request.user.perfil.rol == 'consulta':
+        return redirect('propiedades_lista')
+    propiedad = get_object_or_404(Propiedad, pk=pk)
+    if request.method == 'POST':
+        propiedad.delete()
+        return redirect('propiedades_lista')
+    return render(request, 'core/confirmar_eliminar.html', {
+        'objeto': propiedad.domicilio,
+        'tipo': 'la propiedad',
+        'volver': 'propiedades_lista',
+    })
+
+
+@login_required
+def inquilino_eliminar(request, pk):
+    if request.user.perfil.rol == 'consulta':
+        return redirect('inquilinos_lista')
+    inquilino = get_object_or_404(Inquilino, pk=pk)
+    if request.method == 'POST':
+        inquilino.delete()
+        return redirect('inquilinos_lista')
+    return render(request, 'core/confirmar_eliminar.html', {
+        'objeto': str(inquilino),
+        'tipo': 'el inquilino',
+        'volver': 'inquilinos_lista',
+    })
+
+
+@login_required
+def vencimiento_editar(request, pk):
+    from .forms import VencimientoForm
+    vencimiento = get_object_or_404(Vencimiento, pk=pk)
+    if request.user.perfil.rol == 'consulta':
+        return redirect('vencimientos_lista')
+    if request.method == 'POST':
+        form = VencimientoForm(request.POST, instance=vencimiento)
+        if form.is_valid():
+            form.save()
+            return redirect('vencimientos_lista')
+    else:
+        form = VencimientoForm(instance=vencimiento)
+    return render(request, 'core/form_generico.html', {
+        'form': form, 'titulo': 'Editar Vencimiento', 'volver': 'vencimientos_lista'
+    })
+
+
+@login_required
+def vencimiento_eliminar(request, pk):
+    if request.user.perfil.rol == 'consulta':
+        return redirect('vencimientos_lista')
+    vencimiento = get_object_or_404(Vencimiento, pk=pk)
+    propiedad_pk = vencimiento.propiedad_servicio.propiedad.pk
+    if request.method == 'POST':
+        vencimiento.delete()
+        return redirect('vencimientos_lista')
+    return render(request, 'core/confirmar_eliminar.html', {
+        'objeto': f'{vencimiento.propiedad_servicio.propiedad.domicilio} — {vencimiento.propiedad_servicio.servicio.nombre} ({vencimiento.fecha_vencimiento.strftime("%d/%m/%Y")})',
+        'tipo': 'el vencimiento',
+        'volver': 'vencimientos_lista',
+    })
+
+
+@login_required
+def contrato_eliminar(request, pk):
+    if request.user.perfil.rol == 'consulta':
+        return redirect('contratos_lista')
+    contrato = get_object_or_404(Contrato, pk=pk)
+    if request.method == 'POST':
+        contrato.delete()
+        return redirect('contratos_lista')
+    return render(request, 'core/confirmar_eliminar.html', {
+        'objeto': f'{contrato.propiedad.domicilio} — {contrato.inquilino}',
+        'tipo': 'el contrato',
+        'volver': 'contratos_lista',
+    })

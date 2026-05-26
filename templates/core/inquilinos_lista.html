@@ -23,6 +23,7 @@
       <td>
         {% if request.user.perfil.rol != 'consulta' %}
         <a href="{% url 'inquilino_editar' i.pk %}" class="btn btn-secondary btn-sm"><i class="fa-solid fa-pen"></i> Editar</a>
+        <a href="{% url 'inquilino_eliminar' i.pk %}" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></a>
         {% endif %}
       </td>
     </tr>

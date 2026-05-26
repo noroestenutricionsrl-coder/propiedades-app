@@ -1,0 +1,22 @@
+{% extends 'core/base.html' %}
+{% block title %}Confirmar eliminación{% endblock %}
+{% block page_title %}Confirmar eliminación{% endblock %}
+{% block content %}
+<div style="max-width:500px">
+  <div class="card" style="border-left:4px solid #c0392b">
+    <div class="card-body" style="padding:28px">
+      <p style="font-size:1rem;margin-bottom:12px">
+        ¿Estás segura de que querés eliminar <strong>{{ objeto }}</strong>?
+      </p>
+      <p style="color:#c0392b;font-size:0.875rem;margin-bottom:24px">
+        <i class="fa-solid fa-triangle-exclamation"></i> Esta acción no se puede deshacer.
+      </p>
+      <form method="post" style="display:flex;gap:10px">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger"><i class="fa-solid fa-trash"></i> Sí, eliminar</button>
+        <a href="{% url volver %}" class="btn btn-secondary">Cancelar</a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
