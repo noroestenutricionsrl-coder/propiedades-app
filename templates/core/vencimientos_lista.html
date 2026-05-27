@@ -3,7 +3,7 @@
 {% block page_title %}Vencimientos{% endblock %}
 {% block topbar_actions %}
 {% if request.user.perfil.rol != 'consulta' %}
-<a href="/admin/core/vencimiento/add/" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Nuevo vencimiento</a>
+<a href="{% url 'vencimiento_crear' %}" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Nuevo vencimiento</a>
 {% endif %}
 {% endblock %}
 {% block content %}
@@ -30,7 +30,6 @@
   <button type="submit" class="btn btn-secondary btn-sm"><i class="fa-solid fa-search"></i> Filtrar</button>
 </div>
 </form>
-
 <div class="card">
   <div class="card-header">
     <span class="card-title">{{ vencimientos.count }} vencimiento{{ vencimientos.count|pluralize:"s" }}</span>
@@ -47,7 +46,7 @@
         <th>Importe</th>
         <th>Responsable</th>
         <th>Estado</th>
-        <th>Acción</th>
+        <th>Acciones</th>
       </tr>
     </thead>
     <tbody>
@@ -66,11 +65,15 @@
         {% endif %}
       </td>
       <td><span class="badge badge-{{ v.estado }}">{{ v.get_estado_display }}</span></td>
-      <td>
+      <td style="display:flex;gap:5px;flex-wrap:wrap">
         {% if v.estado != 'pagado' %}
         <a href="{% url 'registrar_pago' v.pk %}?next={{ request.get_full_path }}" class="btn btn-primary btn-sm"><i class="fa-solid fa-check"></i> Pagar</a>
         {% else %}
         <span style="color:#2d8653;font-size:0.82rem"><i class="fa-solid fa-check-double"></i> {{ v.pago.fecha_pago|date:"d/m/Y" }}</span>
+        {% endif %}
+        {% if request.user.perfil.rol != 'consulta' %}
+        <a href="{% url 'vencimiento_editar' v.pk %}" class="btn btn-secondary btn-sm"><i class="fa-solid fa-pen"></i></a>
+        <a href="{% url 'vencimiento_eliminar' v.pk %}" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></a>
         {% endif %}
       </td>
     </tr>
