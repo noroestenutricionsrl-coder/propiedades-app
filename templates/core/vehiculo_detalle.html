@@ -1,0 +1,90 @@
+{% extends 'core/base.html' %}
+{% block title %}{{ vehiculo }}{% endblock %}
+{% block page_title %}{{ vehiculo }}{% endblock %}
+{% block topbar_actions %}
+{% if request.user.perfil.rol != 'consulta' %}
+<a href="{% url 'vehiculo_editar' vehiculo.pk %}" class="btn btn-secondary btn-sm"><i class="fa-solid fa-pen"></i> Editar</a>
+{% endif %}
+{% endblock %}
+{% block content %}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px">
+  <div class="card">
+    <div class="card-header"><span class="card-title">Datos del Vehículo</span></div>
+    <div class="card-body" style="padding:20px">
+      <table style="font-size:0.9rem">
+        <tr><td style="color:#5a7060;padding:6px 0;width:130px">Patente</td><td><code style="background:#f0f4f1;padding:2px 8px;border-radius:4px;font-weight:600">{{ vehiculo.patente }}</code></td></tr>
+        <tr><td style="color:#5a7060;padding:6px 0">Marca/Modelo</td><td><strong>{{ vehiculo.marca }} {{ vehiculo.modelo }}</strong></td></tr>
+        <tr><td style="color:#5a7060;padding:6px 0">Año</td><td>{{ vehiculo.anio|default:"—" }}</td></tr>
+        <tr><td style="color:#5a7060;padding:6px 0">Titular</td><td>{{ vehiculo.get_titular_display }}{% if vehiculo.titular_nombre %} — {{ vehiculo.titular_nombre }}{% endif %}</td></tr>
+        <tr><td style="color:#5a7060;padding:6px 0">Estado</td><td>{% if vehiculo.activo %}<span class="badge badge-pagado">Activo</span>{% else %}<span class="badge badge-disponible">Inactivo</span>{% endif %}</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- Seguros -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title"><i class="fa-solid fa-shield-halved"></i> Seguros</span>
+      {% if request.user.perfil.rol != 'consulta' %}
+      <a href="{% url 'seguro_crear' vehiculo.pk %}" class="btn btn-secondary btn-sm"><i class="fa-solid fa-plus"></i> Agregar</a>
+      {% endif %}
+    </div>
+    <div class="card-body" style="padding:0">
+      {% if seguros %}
+      <table>
+        <thead><tr><th>Compañía</th><th>Póliza</th><th>Vencimiento</th><th>Importe</th><th></th></tr></thead>
+        <tbody>
+        {% for s in seguros %}
+        <tr class="{% if s.fecha_vencimiento <= en_7_dias %}advertencia-row{% endif %}">
+          <td><strong>{{ s.compania }}</strong></td>
+          <td><code style="font-size:0.8rem;background:#f0f4f1;padding:2px 6px;border-radius:4px">{{ s.numero_poliza }}</code></td>
+          <td>{{ s.fecha_vencimiento|date:"d/m/Y" }}</td>
+          <td>{% if s.importe %}$ {{ s.importe|floatformat:0 }}{% else %}—{% endif %}</td>
+          <td>{% if request.user.perfil.rol != 'consulta' %}<a href="{% url 'seguro_editar' s.pk %}" class="btn btn-secondary btn-sm"><i class="fa-solid fa-pen"></i></a>{% endif %}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty-state" style="padding:24px"><i class="fa-solid fa-shield-halved"></i><p>Sin seguros cargados.</p></div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Patentes -->
+<div class="card">
+  <div class="card-header">
+    <span class="card-title"><i class="fa-solid fa-id-card"></i> Patentes</span>
+    {% if request.user.perfil.rol != 'consulta' %}
+    <a href="{% url 'patente_crear' vehiculo.pk %}" class="btn btn-secondary btn-sm"><i class="fa-solid fa-plus"></i> Nueva cuota</a>
+    {% endif %}
+  </div>
+  <div class="card-body">
+  {% if patentes %}
+  <table>
+    <thead><tr><th>Período</th><th>Vencimiento</th><th>Importe</th><th>Estado</th><th>Fecha pago</th><th>Comprobante</th><th></th></tr></thead>
+    <tbody>
+    {% for p in patentes %}
+    <tr class="{% if p.estado == 'vencido' %}alerta-row{% elif p.estado == 'pendiente' %}advertencia-row{% endif %}">
+      <td><strong>{{ p.periodo }}</strong></td>
+      <td>{{ p.fecha_vencimiento|date:"d/m/Y" }}</td>
+      <td>{% if p.importe %}$ {{ p.importe|floatformat:0 }}{% else %}—{% endif %}</td>
+      <td><span class="badge badge-{{ p.estado }}">{{ p.get_estado_display }}</span></td>
+      <td>{{ p.fecha_pago|date:"d/m/Y"|default:"—" }}</td>
+      <td>{{ p.numero_comprobante|default:"—" }}</td>
+      <td>
+        {% if p.estado != 'pagado' and request.user.perfil.rol != 'consulta' %}
+        <a href="{% url 'patente_pagar' p.pk %}" class="btn btn-primary btn-sm"><i class="fa-solid fa-check"></i> Pagar</a>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state"><i class="fa-solid fa-id-card"></i><p>Sin cuotas de patente cargadas.</p></div>
+  {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'core/base.html' %}
+{% block title %}Flota de Vehículos{% endblock %}
+{% block page_title %}Flota de Vehículos{% endblock %}
+{% block topbar_actions %}
+{% if request.user.perfil.rol != 'consulta' %}
+<a href="{% url 'vehiculo_crear' %}" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Nuevo vehículo</a>
+{% endif %}
+{% endblock %}
+{% block content %}
+<div class="filtros">
+  <form method="get" style="display:flex;gap:10px;align-items:center">
+    <select name="titular">
+      <option value="">Todos los titulares</option>
+      {% for valor, nombre in titulares %}
+      <option value="{{ valor }}" {% if titular_filtro == valor %}selected{% endif %}>{{ nombre }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-secondary btn-sm"><i class="fa-solid fa-search"></i> Filtrar</button>
+  </form>
+</div>
+<div class="card">
+  <div class="card-body">
+  {% if vehiculos %}
+  <table>
+    <thead>
+      <tr>
+        <th>Patente</th>
+        <th>Vehículo</th>
+        <th>Año</th>
+        <th>Titular</th>
+        <th>Estado</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for v in vehiculos %}
+    <tr>
+      <td><code style="background:#f0f4f1;padding:3px 8px;border-radius:4px;font-weight:600;font-size:0.9rem">{{ v.patente }}</code></td>
+      <td><strong>{{ v.marca }} {{ v.modelo }}</strong></td>
+      <td>{{ v.anio|default:"—" }}</td>
+      <td>{{ v.get_titular_display }}{% if v.titular_nombre %} — {{ v.titular_nombre }}{% endif %}</td>
+      <td>{% if v.activo %}<span class="badge badge-pagado">Activo</span>{% else %}<span class="badge badge-disponible">Inactivo</span>{% endif %}</td>
+      <td style="display:flex;gap:6px">
+        <a href="{% url 'vehiculo_detalle' v.pk %}" class="btn btn-secondary btn-sm"><i class="fa-solid fa-eye"></i> Ver</a>
+        {% if request.user.perfil.rol != 'consulta' %}
+        <a href="{% url 'vehiculo_eliminar' v.pk %}" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></a>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state"><i class="fa-solid fa-car"></i><p>No hay vehículos cargados.</p></div>
+  {% endif %}
+  </div>
+</div>
+{% endblock %}

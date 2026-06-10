@@ -123,3 +123,46 @@ class ServicioImpuestoForm(forms.ModelForm):
             'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Luz (EDET)'}),
             'tipo': forms.Select(attrs={'class': 'form-control'}),
         }
+
+
+class VehiculoForm(forms.ModelForm):
+    class Meta:
+        model = Vehiculo
+        fields = ['patente', 'marca', 'modelo', 'anio', 'titular', 'titular_nombre', 'activo', 'notas']
+        widgets = {
+            'patente': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: AB123CD'}),
+            'marca': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Toyota'}),
+            'modelo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Hilux'}),
+            'anio': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ej: 2020'}),
+            'titular': forms.Select(attrs={'class': 'form-control'}),
+            'titular_nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Solo si titular es Otro'}),
+            'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'notas': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+        }
+
+
+class SeguroVehiculoForm(forms.ModelForm):
+    class Meta:
+        model = SeguroVehiculo
+        fields = ['compania', 'numero_poliza', 'fecha_inicio', 'fecha_vencimiento', 'importe', 'activo', 'notas']
+        widgets = {
+            'compania': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: La Caja'}),
+            'numero_poliza': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'N° de póliza'}),
+            'fecha_inicio': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'fecha_vencimiento': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'importe': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'notas': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+        }
+
+
+class PatenteVehiculoForm(forms.ModelForm):
+    class Meta:
+        model = PatenteVehiculo
+        fields = ['periodo', 'fecha_vencimiento', 'importe', 'notas']
+        widgets = {
+            'periodo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Enero 2025'}),
+            'fecha_vencimiento': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'importe': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'notas': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+        }

@@ -242,3 +242,74 @@ class Documento(models.Model):
         verbose_name = "Documento"
         verbose_name_plural = "Documentos"
         ordering = ['-fecha_carga']
+
+
+# ============ FLOTA DE VEHÍCULOS ============
+
+class Vehiculo(models.Model):
+    TITULAR_CHOICES = [
+        ('drogueria_san_juan', 'Droguería San Juan SRL'),
+        ('noroeste_nutricion', 'Noroeste Nutrición SRL'),
+        ('socio', 'Socio'),
+        ('otro', 'Otro'),
+    ]
+    patente = models.CharField(max_length=10, unique=True)
+    marca = models.CharField(max_length=50)
+    modelo = models.CharField(max_length=50)
+    anio = models.PositiveIntegerField(null=True, blank=True, verbose_name="Año")
+    titular = models.CharField(max_length=30, choices=TITULAR_CHOICES)
+    titular_nombre = models.CharField(max_length=100, blank=True, help_text="Si el titular es 'Otro', especificar nombre")
+    activo = models.BooleanField(default=True)
+    notas = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"{self.patente} — {self.marca} {self.modelo}"
+
+    class Meta:
+        verbose_name = "Vehículo"
+        verbose_name_plural = "Vehículos"
+        ordering = ['patente']
+
+
+class SeguroVehiculo(models.Model):
+    vehiculo = models.ForeignKey(Vehiculo, on_delete=models.CASCADE, related_name='seguros')
+    compania = models.CharField(max_length=100, verbose_name="Compañía aseguradora")
+    numero_poliza = models.CharField(max_length=50, verbose_name="N° de póliza")
+    fecha_inicio = models.DateField()
+    fecha_vencimiento = models.DateField()
+    importe = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    activo = models.BooleanField(default=True)
+    notas = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"{self.vehiculo} — {self.compania} (vence {self.fecha_vencimiento})"
+
+    class Meta:
+        verbose_name = "Seguro de Vehículo"
+        verbose_name_plural = "Seguros de Vehículos"
+        ordering = ['fecha_vencimiento']
+
+
+class PatenteVehiculo(models.Model):
+    ESTADO_CHOICES = [
+        ('pendiente', 'Pendiente'),
+        ('pagado', 'Pagado'),
+        ('vencido', 'Vencido'),
+    ]
+    vehiculo = models.ForeignKey(Vehiculo, on_delete=models.CASCADE, related_name='patentes')
+    periodo = models.CharField(max_length=20, help_text="Ej: Enero 2025")
+    fecha_vencimiento = models.DateField()
+    importe = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='pendiente')
+    fecha_pago = models.DateField(null=True, blank=True)
+    importe_pagado = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    numero_comprobante = models.CharField(max_length=100, blank=True)
+    notas = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"{self.vehiculo} — Patente {self.periodo}"
+
+    class Meta:
+        verbose_name = "Patente de Vehículo"
+        verbose_name_plural = "Patentes de Vehículos"
+        ordering = ['fecha_vencimiento']

@@ -43,4 +43,13 @@ urlpatterns = [
     path('usuarios/nuevo/', views.usuario_crear, name='usuario_crear'),
     path('usuarios/<int:pk>/editar/', views.usuario_editar, name='usuario_editar'),
     path('usuarios/<int:pk>/eliminar/', views.usuario_eliminar, name='usuario_eliminar'),
+    path('vehiculos/', views.vehiculos_lista, name='vehiculos_lista'),
+    path('vehiculos/nuevo/', views.vehiculo_crear, name='vehiculo_crear'),
+    path('vehiculos/<int:pk>/', views.vehiculo_detalle, name='vehiculo_detalle'),
+    path('vehiculos/<int:pk>/editar/', views.vehiculo_editar, name='vehiculo_editar'),
+    path('vehiculos/<int:pk>/eliminar/', views.vehiculo_eliminar, name='vehiculo_eliminar'),
+    path('vehiculos/<int:vehiculo_pk>/seguro/', views.seguro_crear, name='seguro_crear'),
+    path('seguros/<int:pk>/editar/', views.seguro_editar, name='seguro_editar'),
+    path('vehiculos/<int:vehiculo_pk>/patente/', views.patente_crear, name='patente_crear'),
+    path('patentes/<int:pk>/pagar/', views.patente_pagar, name='patente_pagar'),
 ]

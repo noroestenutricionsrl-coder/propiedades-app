@@ -770,3 +770,176 @@ def contrato_eliminar(request, pk):
         'tipo': 'el contrato',
         'volver': 'contratos_lista',
     })
+
+
+# ============ FLOTA DE VEHÍCULOS ============
+
+@login_required
+def vehiculos_lista(request):
+    from .models import Vehiculo
+    titular = request.GET.get('titular', '')
+    vehiculos = Vehiculo.objects.all()
+    if titular:
+        vehiculos = vehiculos.filter(titular=titular)
+    return render(request, 'core/vehiculos_lista.html', {
+        'vehiculos': vehiculos,
+        'titular_filtro': titular,
+        'titulares': Vehiculo.TITULAR_CHOICES,
+    })
+
+
+@login_required
+def vehiculo_detalle(request, pk):
+    from .models import Vehiculo
+    from datetime import date, timedelta
+    vehiculo = get_object_or_404(Vehiculo, pk=pk)
+    hoy = date.today()
+    en_7_dias = hoy + timedelta(days=7)
+
+    # Actualizar patentes vencidas
+    vehiculo.patentes.filter(estado='pendiente', fecha_vencimiento__lt=hoy).update(estado='vencido')
+
+    seguros = vehiculo.seguros.filter(activo=True).order_by('-fecha_vencimiento')
+    patentes = vehiculo.patentes.all().order_by('-fecha_vencimiento')
+
+    return render(request, 'core/vehiculo_detalle.html', {
+        'vehiculo': vehiculo,
+        'seguros': seguros,
+        'patentes': patentes,
+        'hoy': hoy,
+        'en_7_dias': en_7_dias,
+    })
+
+
+@login_required
+def vehiculo_crear(request):
+    from .forms import VehiculoForm
+    if request.user.perfil.rol == 'consulta':
+        return redirect('vehiculos_lista')
+    if request.method == 'POST':
+        form = VehiculoForm(request.POST)
+        if form.is_valid():
+            v = form.save()
+            return redirect('vehiculo_detalle', pk=v.pk)
+    else:
+        form = VehiculoForm()
+    return render(request, 'core/form_generico.html', {
+        'form': form, 'titulo': 'Nuevo Vehículo', 'volver': 'vehiculos_lista'
+    })
+
+
+@login_required
+def vehiculo_editar(request, pk):
+    from .forms import VehiculoForm
+    from .models import Vehiculo
+    vehiculo = get_object_or_404(Vehiculo, pk=pk)
+    if request.user.perfil.rol == 'consulta':
+        return redirect('vehiculo_detalle', pk=pk)
+    if request.method == 'POST':
+        form = VehiculoForm(request.POST, instance=vehiculo)
+        if form.is_valid():
+            form.save()
+            return redirect('vehiculo_detalle', pk=pk)
+    else:
+        form = VehiculoForm(instance=vehiculo)
+    return render(request, 'core/form_generico.html', {
+        'form': form, 'titulo': f'Editar — {vehiculo}', 'volver': 'vehiculos_lista'
+    })
+
+
+@login_required
+def vehiculo_eliminar(request, pk):
+    from .models import Vehiculo
+    if request.user.perfil.rol == 'consulta':
+        return redirect('vehiculos_lista')
+    vehiculo = get_object_or_404(Vehiculo, pk=pk)
+    if request.method == 'POST':
+        vehiculo.delete()
+        return redirect('vehiculos_lista')
+    return render(request, 'core/confirmar_eliminar.html', {
+        'objeto': str(vehiculo), 'tipo': 'el vehículo', 'volver': 'vehiculos_lista'
+    })
+
+
+@login_required
+def seguro_crear(request, vehiculo_pk):
+    from .forms import SeguroVehiculoForm
+    from .models import Vehiculo
+    vehiculo = get_object_or_404(Vehiculo, pk=vehiculo_pk)
+    if request.user.perfil.rol == 'consulta':
+        return redirect('vehiculo_detalle', pk=vehiculo_pk)
+    if request.method == 'POST':
+        form = SeguroVehiculoForm(request.POST)
+        if form.is_valid():
+            s = form.save(commit=False)
+            s.vehiculo = vehiculo
+            s.save()
+            return redirect('vehiculo_detalle', pk=vehiculo_pk)
+    else:
+        form = SeguroVehiculoForm()
+    return render(request, 'core/form_generico.html', {
+        'form': form, 'titulo': f'Nuevo Seguro — {vehiculo}',
+        'volver': 'vehiculo_detalle', 'volver_pk': vehiculo_pk
+    })
+
+
+@login_required
+def seguro_editar(request, pk):
+    from .forms import SeguroVehiculoForm
+    from .models import SeguroVehiculo
+    seguro = get_object_or_404(SeguroVehiculo, pk=pk)
+    if request.user.perfil.rol == 'consulta':
+        return redirect('vehiculo_detalle', pk=seguro.vehiculo.pk)
+    if request.method == 'POST':
+        form = SeguroVehiculoForm(request.POST, instance=seguro)
+        if form.is_valid():
+            form.save()
+            return redirect('vehiculo_detalle', pk=seguro.vehiculo.pk)
+    else:
+        form = SeguroVehiculoForm(instance=seguro)
+    return render(request, 'core/form_generico.html', {
+        'form': form, 'titulo': f'Editar Seguro — {seguro.vehiculo}',
+        'volver': 'vehiculo_detalle', 'volver_pk': seguro.vehiculo.pk
+    })
+
+
+@login_required
+def patente_crear(request, vehiculo_pk):
+    from .forms import PatenteVehiculoForm
+    from .models import Vehiculo
+    vehiculo = get_object_or_404(Vehiculo, pk=vehiculo_pk)
+    if request.user.perfil.rol == 'consulta':
+        return redirect('vehiculo_detalle', pk=vehiculo_pk)
+    if request.method == 'POST':
+        form = PatenteVehiculoForm(request.POST)
+        if form.is_valid():
+            p = form.save(commit=False)
+            p.vehiculo = vehiculo
+            p.save()
+            return redirect('vehiculo_detalle', pk=vehiculo_pk)
+    else:
+        form = PatenteVehiculoForm()
+    return render(request, 'core/form_generico.html', {
+        'form': form, 'titulo': f'Nueva Patente — {vehiculo}',
+        'volver': 'vehiculo_detalle', 'volver_pk': vehiculo_pk
+    })
+
+
+@login_required
+def patente_pagar(request, pk):
+    from .models import PatenteVehiculo
+    patente = get_object_or_404(PatenteVehiculo, pk=pk)
+    if request.user.perfil.rol == 'consulta':
+        return redirect('vehiculo_detalle', pk=patente.vehiculo.pk)
+    if request.method == 'POST':
+        from datetime import date
+        patente.fecha_pago = request.POST.get('fecha_pago')
+        patente.importe_pagado = request.POST.get('importe_pagado')
+        patente.numero_comprobante = request.POST.get('numero_comprobante', '')
+        patente.estado = 'pagado'
+        patente.save()
+        return redirect('vehiculo_detalle', pk=patente.vehiculo.pk)
+    return render(request, 'core/patente_pagar.html', {
+        'patente': patente,
+        'hoy': date.today().isoformat(),
+    })

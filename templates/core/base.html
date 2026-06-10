@@ -343,6 +343,9 @@ tr:hover td { background: #fafcfb; }
     <a href="{% url 'contratos_lista' %}" class="nav-item {% if 'contrato' in request.resolver_match.url_name %}active{% endif %}">
       <i class="fa-solid fa-file-contract"></i> Contratos
     </a>
+    <a href="{% url 'vehiculos_lista' %}" class="nav-item {% if 'vehiculo' in request.resolver_match.url_name or 'seguro' in request.resolver_match.url_name or 'patente' in request.resolver_match.url_name %}active{% endif %}">
+      <i class="fa-solid fa-car"></i> Flota de Vehículos
+    </a>
     <div class="nav-section">Reportes</div>
     <a href="{% url 'exportar_excel' %}" class="nav-item {% if 'exportar' in request.resolver_match.url_name %}active{% endif %}">
       <i class="fa-solid fa-file-excel"></i> Exportar Excel
