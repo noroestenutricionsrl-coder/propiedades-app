@@ -73,6 +73,18 @@ def dashboard(request):
         estado='vencido'
     ).select_related('vehiculo').order_by('fecha_vencimiento')
 
+    # Vehículos sin patente cargada para el mes actual
+    from .models import Vehiculo as VehiculoModel
+    vehiculos_activos = VehiculoModel.objects.filter(activo=True)
+    vehiculos_sin_patente_mes = []
+    for v in vehiculos_activos:
+        tiene_patente_mes = v.patentes.filter(
+            fecha_vencimiento__year=hoy.year,
+            fecha_vencimiento__month=hoy.month
+        ).exists()
+        if not tiene_patente_mes:
+            vehiculos_sin_patente_mes.append(v)
+
     # Seguros vehículos próximos a vencer
     seguros_proximos = SeguroVehiculo.objects.filter(
         activo=True,
@@ -84,6 +96,13 @@ def dashboard(request):
         activo=True,
         fecha_vencimiento__lt=hoy
     ).select_related('vehiculo').order_by('fecha_vencimiento')
+    
+    # Vehículos sin seguro activo
+    vehiculos_sin_seguro = []
+    for v in vehiculos_activos:
+        tiene_seguro = v.seguros.filter(activo=True, fecha_vencimiento__gte=hoy).exists()
+        if not tiene_seguro:
+            vehiculos_sin_seguro.append(v)
 
     stats = {
         'total_propiedades': Propiedad.objects.count(),
@@ -104,6 +123,8 @@ def dashboard(request):
         'patentes_vencidas': patentes_vencidas,
         'seguros_proximos': seguros_proximos,
         'seguros_vencidos': seguros_vencidos,
+        'vehiculos_sin_patente_mes': vehiculos_sin_patente_mes,
+        'vehiculos_sin_seguro': vehiculos_sin_seguro,
         'stats': stats,
         'hoy': hoy,
         'mes_nombre': hoy.strftime('%B %Y').capitalize(),
@@ -961,11 +982,11 @@ def patente_crear(request, vehiculo_pk):
 @login_required
 def patente_pagar(request, pk):
     from .models import PatenteVehiculo
+    from datetime import date as date_class
     patente = get_object_or_404(PatenteVehiculo, pk=pk)
     if request.user.perfil.rol == 'consulta':
         return redirect('vehiculo_detalle', pk=patente.vehiculo.pk)
     if request.method == 'POST':
-        from datetime import date
         patente.fecha_pago = request.POST.get('fecha_pago')
         patente.importe_pagado = request.POST.get('importe_pagado')
         patente.numero_comprobante = request.POST.get('numero_comprobante', '')
@@ -974,5 +995,5 @@ def patente_pagar(request, pk):
         return redirect('vehiculo_detalle', pk=patente.vehiculo.pk)
     return render(request, 'core/patente_pagar.html', {
         'patente': patente,
-        'hoy': date.today().isoformat(),
+        'hoy': date_class.today().isoformat(),
     })
