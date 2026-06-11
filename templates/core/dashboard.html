@@ -1,109 +1,5 @@
 {% extends 'core/base.html' %}
-{% block title %}Dashboard — Gestión de Propiedades
-{% if vehiculos_sin_patente_mes or vehiculos_sin_seguro %}
-<div class="card" style="border-left: 4px solid #c0392b;margin-bottom:20px">
-  <div class="card-header">
-    <span class="card-title" style="color:#c0392b;"><i class="fa-solid fa-car"></i> Vehículos — Control mensual</span>
-    <a href="{% url 'vehiculos_lista' %}" class="btn btn-secondary btn-sm">Ver flota</a>
-  </div>
-  <div class="card-body">
-    <table>
-      <thead><tr><th>Patente</th><th>Vehículo</th><th>Titular</th><th>Problema</th><th>Acción</th></tr></thead>
-      <tbody>
-      {% for v in vehiculos_sin_patente_mes %}
-      <tr class="alerta-row">
-        <td><code style="background:#f8d7da;padding:2px 8px;border-radius:4px;font-weight:600">{{ v.patente }}</code></td>
-        <td>{{ v.marca }} {{ v.modelo }}</td>
-        <td>{{ v.get_titular_display }}</td>
-        <td><span style="color:#c0392b"><i class="fa-solid fa-triangle-exclamation"></i> Patente {{ mes_nombre }} sin cargar</span></td>
-        <td><a href="{% url 'patente_crear' v.pk %}" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Cargar</a></td>
-      </tr>
-      {% endfor %}
-      {% for v in vehiculos_sin_seguro %}
-      <tr class="alerta-row">
-        <td><code style="background:#f8d7da;padding:2px 8px;border-radius:4px;font-weight:600">{{ v.patente }}</code></td>
-        <td>{{ v.marca }} {{ v.modelo }}</td>
-        <td>{{ v.get_titular_display }}</td>
-        <td><span style="color:#c0392b"><i class="fa-solid fa-triangle-exclamation"></i> Sin seguro activo</span></td>
-        <td><a href="{% url 'seguro_crear' v.pk %}" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Cargar</a></td>
-      </tr>
-      {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</div>
-{% endif %}
-
-{% if patentes_vencidas or seguros_vencidos %}
-<div class="card" style="border-left: 4px solid #c0392b;margin-top:20px">
-  <div class="card-header">
-    <span class="card-title" style="color:#c0392b;"><i class="fa-solid fa-car"></i> Vehículos — Vencidos sin pagar</span>
-    <a href="{% url 'vehiculos_lista' %}" class="btn btn-secondary btn-sm">Ver flota</a>
-  </div>
-  <div class="card-body">
-    <table>
-      <thead><tr><th>Vehículo</th><th>Tipo</th><th>Detalle</th><th>Vencimiento</th><th>Acción</th></tr></thead>
-      <tbody>
-      {% for p in patentes_vencidas %}
-      <tr class="alerta-row">
-        <td><strong>{{ p.vehiculo.patente }}</strong> — {{ p.vehiculo.marca }} {{ p.vehiculo.modelo }}</td>
-        <td>Patente</td>
-        <td>{{ p.periodo }}</td>
-        <td>{{ p.fecha_vencimiento|date:"d/m/Y" }}</td>
-        <td><a href="{% url 'patente_pagar' p.pk %}" class="btn btn-primary btn-sm"><i class="fa-solid fa-check"></i> Pagar</a></td>
-      </tr>
-      {% endfor %}
-      {% for s in seguros_vencidos %}
-      <tr class="alerta-row">
-        <td><strong>{{ s.vehiculo.patente }}</strong> — {{ s.vehiculo.marca }} {{ s.vehiculo.modelo }}</td>
-        <td>Seguro</td>
-        <td>{{ s.compania }} — Póliza {{ s.numero_poliza }}</td>
-        <td>{{ s.fecha_vencimiento|date:"d/m/Y" }}</td>
-        <td><a href="{% url 'seguro_editar' s.pk %}" class="btn btn-secondary btn-sm"><i class="fa-solid fa-pen"></i> Renovar</a></td>
-      </tr>
-      {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</div>
-{% endif %}
-
-{% if patentes_proximas or seguros_proximos %}
-<div class="card" style="border-left: 4px solid #d4a017;margin-top:20px">
-  <div class="card-header">
-    <span class="card-title"><i class="fa-solid fa-car" style="color:#d4a017"></i> Vehículos — Próximos 7 días</span>
-  </div>
-  <div class="card-body">
-    <table>
-      <thead><tr><th>Vehículo</th><th>Tipo</th><th>Detalle</th><th>Vencimiento</th><th>Importe</th><th>Acción</th></tr></thead>
-      <tbody>
-      {% for p in patentes_proximas %}
-      <tr class="advertencia-row">
-        <td><strong>{{ p.vehiculo.patente }}</strong> — {{ p.vehiculo.marca }} {{ p.vehiculo.modelo }}</td>
-        <td>Patente</td>
-        <td>{{ p.periodo }}</td>
-        <td>{{ p.fecha_vencimiento|date:"d/m/Y" }}</td>
-        <td>{% if p.importe %}$ {{ p.importe|floatformat:0 }}{% else %}—{% endif %}</td>
-        <td><a href="{% url 'patente_pagar' p.pk %}" class="btn btn-primary btn-sm"><i class="fa-solid fa-check"></i> Pagar</a></td>
-      </tr>
-      {% endfor %}
-      {% for s in seguros_proximos %}
-      <tr class="advertencia-row">
-        <td><strong>{{ s.vehiculo.patente }}</strong> — {{ s.vehiculo.marca }} {{ s.vehiculo.modelo }}</td>
-        <td>Seguro</td>
-        <td>{{ s.compania }}</td>
-        <td>{{ s.fecha_vencimiento|date:"d/m/Y" }}</td>
-        <td>{% if s.importe %}$ {{ s.importe|floatformat:0 }}{% else %}—{% endif %}</td>
-        <td><a href="{% url 'seguro_editar' s.pk %}" class="btn btn-secondary btn-sm"><i class="fa-solid fa-pen"></i> Renovar</a></td>
-      </tr>
-      {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</div>
-{% endif %}
-{% endblock %}
-{% block page_title %}Dashboard — {{ mes_nombre }}{% endblock %}
+{% block title %}Dashboard — Gestión de Propiedades{% endblock %}
 
 {% block content %}
 {% if messages %}
@@ -231,4 +127,102 @@
     {% endif %}
   </div>
 </div>
+
+{% if vehiculos_sin_patente_mes or vehiculos_sin_seguro %}
+<div class="card" style="border-left: 4px solid #c0392b;margin-top:20px">
+  <div class="card-header">
+    <span class="card-title" style="color:#c0392b;"><i class="fa-solid fa-car"></i> Vehículos — Control mensual</span>
+    <a href="{% url 'vehiculos_lista' %}" class="btn btn-secondary btn-sm">Ver flota</a>
+  </div>
+  <div class="card-body">
+    <table>
+      <thead><tr><th>Patente</th><th>Vehículo</th><th>Titular</th><th>Problema</th><th>Acción</th></tr></thead>
+      <tbody>
+      {% for v in vehiculos_sin_patente_mes %}
+      <tr class="alerta-row">
+        <td><code style="background:#f8d7da;padding:2px 8px;border-radius:4px;font-weight:600">{{ v.patente }}</code></td>
+        <td>{{ v.marca }} {{ v.modelo }}</td>
+        <td>{{ v.get_titular_display }}</td>
+        <td><span style="color:#c0392b"><i class="fa-solid fa-triangle-exclamation"></i> Patente {{ mes_nombre }} sin cargar</span></td>
+        <td><a href="{% url 'patente_crear' v.pk %}" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Cargar</a></td>
+      </tr>
+      {% endfor %}
+      {% for v in vehiculos_sin_seguro %}
+      <tr class="alerta-row">
+        <td><code style="background:#f8d7da;padding:2px 8px;border-radius:4px;font-weight:600">{{ v.patente }}</code></td>
+        <td>{{ v.marca }} {{ v.modelo }}</td>
+        <td>{{ v.get_titular_display }}</td>
+        <td><span style="color:#c0392b"><i class="fa-solid fa-triangle-exclamation"></i> Sin seguro activo</span></td>
+        <td><a href="{% url 'seguro_crear' v.pk %}" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Cargar</a></td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% if patentes_vencidas or seguros_vencidos %}
+<div class="card" style="border-left: 4px solid #c0392b;margin-top:20px">
+  <div class="card-header">
+    <span class="card-title" style="color:#c0392b;"><i class="fa-solid fa-car"></i> Vehículos — Vencidos sin pagar</span>
+  </div>
+  <div class="card-body">
+    <table>
+      <thead><tr><th>Vehículo</th><th>Tipo</th><th>Detalle</th><th>Vencimiento</th><th>Acción</th></tr></thead>
+      <tbody>
+      {% for p in patentes_vencidas %}
+      <tr class="alerta-row">
+        <td><strong>{{ p.vehiculo.patente }}</strong> — {{ p.vehiculo.marca }} {{ p.vehiculo.modelo }}</td>
+        <td>Patente</td><td>{{ p.periodo }}</td>
+        <td>{{ p.fecha_vencimiento|date:"d/m/Y" }}</td>
+        <td><a href="{% url 'patente_pagar' p.pk %}" class="btn btn-primary btn-sm"><i class="fa-solid fa-check"></i> Pagar</a></td>
+      </tr>
+      {% endfor %}
+      {% for s in seguros_vencidos %}
+      <tr class="alerta-row">
+        <td><strong>{{ s.vehiculo.patente }}</strong> — {{ s.vehiculo.marca }} {{ s.vehiculo.modelo }}</td>
+        <td>Seguro</td><td>{{ s.compania }}</td>
+        <td>{{ s.fecha_vencimiento|date:"d/m/Y" }}</td>
+        <td><a href="{% url 'seguro_editar' s.pk %}" class="btn btn-secondary btn-sm"><i class="fa-solid fa-pen"></i> Renovar</a></td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% if patentes_proximas or seguros_proximos %}
+<div class="card" style="border-left: 4px solid #d4a017;margin-top:20px">
+  <div class="card-header">
+    <span class="card-title"><i class="fa-solid fa-car" style="color:#d4a017"></i> Vehículos — Próximos 7 días</span>
+  </div>
+  <div class="card-body">
+    <table>
+      <thead><tr><th>Vehículo</th><th>Tipo</th><th>Detalle</th><th>Vencimiento</th><th>Importe</th><th>Acción</th></tr></thead>
+      <tbody>
+      {% for p in patentes_proximas %}
+      <tr class="advertencia-row">
+        <td><strong>{{ p.vehiculo.patente }}</strong> — {{ p.vehiculo.marca }} {{ p.vehiculo.modelo }}</td>
+        <td>Patente</td><td>{{ p.periodo }}</td>
+        <td>{{ p.fecha_vencimiento|date:"d/m/Y" }}</td>
+        <td>{% if p.importe %}$ {{ p.importe|floatformat:0 }}{% else %}—{% endif %}</td>
+        <td><a href="{% url 'patente_pagar' p.pk %}" class="btn btn-primary btn-sm"><i class="fa-solid fa-check"></i> Pagar</a></td>
+      </tr>
+      {% endfor %}
+      {% for s in seguros_proximos %}
+      <tr class="advertencia-row">
+        <td><strong>{{ s.vehiculo.patente }}</strong> — {{ s.vehiculo.marca }} {{ s.vehiculo.modelo }}</td>
+        <td>Seguro</td><td>{{ s.compania }}</td>
+        <td>{{ s.fecha_vencimiento|date:"d/m/Y" }}</td>
+        <td>{% if s.importe %}$ {{ s.importe|floatformat:0 }}{% else %}—{% endif %}</td>
+        <td><a href="{% url 'seguro_editar' s.pk %}" class="btn btn-secondary btn-sm"><i class="fa-solid fa-pen"></i> Renovar</a></td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
 {% endblock %}
