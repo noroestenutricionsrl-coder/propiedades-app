@@ -32,11 +32,17 @@ def logout_view(request):
 
 @login_required
 def dashboard(request):
+    from .models import PatenteVehiculo, SeguroVehiculo
     hoy = date.today()
     en_7_dias = hoy + timedelta(days=7)
     
-    # Actualizar estados vencidos
+    # Actualizar estados vencidos - propiedades
     Vencimiento.objects.filter(
+        estado='pendiente', fecha_vencimiento__lt=hoy
+    ).update(estado='vencido')
+
+    # Actualizar patentes vencidas
+    PatenteVehiculo.objects.filter(
         estado='pendiente', fecha_vencimiento__lt=hoy
     ).update(estado='vencido')
 
@@ -56,11 +62,34 @@ def dashboard(request):
         fecha_vencimiento__month=hoy.month
     ).select_related('propiedad_servicio__propiedad', 'propiedad_servicio__servicio').order_by('fecha_vencimiento')
 
+    # Patentes vehículos
+    patentes_proximas = PatenteVehiculo.objects.filter(
+        estado='pendiente',
+        fecha_vencimiento__gte=hoy,
+        fecha_vencimiento__lte=en_7_dias
+    ).select_related('vehiculo').order_by('fecha_vencimiento')
+
+    patentes_vencidas = PatenteVehiculo.objects.filter(
+        estado='vencido'
+    ).select_related('vehiculo').order_by('fecha_vencimiento')
+
+    # Seguros vehículos próximos a vencer
+    seguros_proximos = SeguroVehiculo.objects.filter(
+        activo=True,
+        fecha_vencimiento__gte=hoy,
+        fecha_vencimiento__lte=en_7_dias
+    ).select_related('vehiculo').order_by('fecha_vencimiento')
+
+    seguros_vencidos = SeguroVehiculo.objects.filter(
+        activo=True,
+        fecha_vencimiento__lt=hoy
+    ).select_related('vehiculo').order_by('fecha_vencimiento')
+
     stats = {
         'total_propiedades': Propiedad.objects.count(),
         'propiedades_alquiladas': Propiedad.objects.filter(estado='alquilada').count(),
-        'vencimientos_proximos': proximos.count(),
-        'vencimientos_vencidos': Vencimiento.objects.filter(estado='vencido').count(),
+        'vencimientos_proximos': proximos.count() + patentes_proximas.count() + seguros_proximos.count(),
+        'vencimientos_vencidos': Vencimiento.objects.filter(estado='vencido').count() + patentes_vencidas.count() + seguros_vencidos.count(),
         'pagos_mes': Pago.objects.filter(
             fecha_pago__year=hoy.year,
             fecha_pago__month=hoy.month
@@ -71,6 +100,10 @@ def dashboard(request):
         'proximos': proximos,
         'vencidos': vencidos,
         'mes_actual': mes_actual,
+        'patentes_proximas': patentes_proximas,
+        'patentes_vencidas': patentes_vencidas,
+        'seguros_proximos': seguros_proximos,
+        'seguros_vencidos': seguros_vencidos,
         'stats': stats,
         'hoy': hoy,
         'mes_nombre': hoy.strftime('%B %Y').capitalize(),

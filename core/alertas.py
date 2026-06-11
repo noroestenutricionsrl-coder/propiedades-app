@@ -102,11 +102,15 @@ def generar_html_alerta(vencimientos_proximos, vencimientos_vencidos):
 
 def enviar_alertas():
     """Función principal que envía alertas a todos los usuarios configurados."""
+    from .models import PatenteVehiculo, SeguroVehiculo
     hoy = date.today()
     en_7_dias = hoy + timedelta(days=7)
     
     # Actualizar vencidos
     Vencimiento.objects.filter(
+        estado='pendiente', fecha_vencimiento__lt=hoy
+    ).update(estado='vencido')
+    PatenteVehiculo.objects.filter(
         estado='pendiente', fecha_vencimiento__lt=hoy
     ).update(estado='vencido')
     
@@ -119,11 +123,49 @@ def enviar_alertas():
     vencidos = list(Vencimiento.objects.filter(
         estado='vencido'
     ).select_related('propiedad_servicio__propiedad', 'propiedad_servicio__servicio'))
+
+    patentes_proximas = list(PatenteVehiculo.objects.filter(
+        estado='pendiente',
+        fecha_vencimiento__gte=hoy,
+        fecha_vencimiento__lte=en_7_dias
+    ).select_related('vehiculo'))
+
+    patentes_vencidas = list(PatenteVehiculo.objects.filter(
+        estado='vencido'
+    ).select_related('vehiculo'))
+
+    seguros_proximos = list(SeguroVehiculo.objects.filter(
+        activo=True,
+        fecha_vencimiento__gte=hoy,
+        fecha_vencimiento__lte=en_7_dias
+    ).select_related('vehiculo'))
+
+    seguros_vencidos = list(SeguroVehiculo.objects.filter(
+        activo=True,
+        fecha_vencimiento__lt=hoy
+    ).select_related('vehiculo'))
     
-    if not proximos and not vencidos:
+    if not proximos and not vencidos and not patentes_proximas and not patentes_vencidas and not seguros_proximos and not seguros_vencidos:
         print("No hay alertas para enviar")
         return
     
+    # Generar secciones de vehículos para el email
+    if patentes_vencidas:
+        vencidos_html_extra = "<h3 style='color:#c0392b;margin-top:20px'>Patentes vencidas</h3><table style='width:100%;border-collapse:collapse'><tr style='background:#f8f8f8'><th style='padding:8px;text-align:left'>Vehículo</th><th style='padding:8px;text-align:left'>Período</th><th style='padding:8px;text-align:left'>Vencimiento</th></tr>"
+        for p in patentes_vencidas:
+            vencidos_html_extra += f"<tr><td style='padding:8px'>{p.vehiculo}</td><td style='padding:8px'>{p.periodo}</td><td style='padding:8px'>{p.fecha_vencimiento.strftime('%d/%m/%Y')}</td></tr>"
+        vencidos_html_extra += "</table>"
+    else:
+        vencidos_html_extra = ""
+
+    if seguros_vencidos:
+        seguros_html_extra = "<h3 style='color:#c0392b;margin-top:20px'>Seguros vencidos</h3><table style='width:100%;border-collapse:collapse'><tr style='background:#f8f8f8'><th style='padding:8px;text-align:left'>Vehículo</th><th style='padding:8px;text-align:left'>Compañía</th><th style='padding:8px;text-align:left'>Vencimiento</th></tr>"
+        for s in seguros_vencidos:
+            seguros_html_extra += f"<tr><td style='padding:8px'>{s.vehiculo}</td><td style='padding:8px'>{s.compania}</td><td style='padding:8px'>{s.fecha_vencimiento.strftime('%d/%m/%Y')}</td></tr>"
+        seguros_html_extra += "</table>"
+    else:
+        seguros_html_extra = ""
+
     # Enviar a todos los usuarios con email activado
     perfiles = PerfilUsuario.objects.filter(notif_email=True).select_related('usuario')
     
