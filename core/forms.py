@@ -2,7 +2,8 @@ from django import forms
 from .models import (
     Propiedad, Propietario, TitularPropiedad,
     ServicioImpuesto, PropiedadServicio,
-    Vencimiento, Inquilino, Contrato
+    Vencimiento, Inquilino, Contrato,
+    Vehiculo, SeguroVehiculo, PatenteVehiculo
 )
 
 
