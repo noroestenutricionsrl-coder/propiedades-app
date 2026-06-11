@@ -997,3 +997,4 @@ def patente_pagar(request, pk):
         'patente': patente,
         'hoy': date_class.today().isoformat(),
     })
+# forzar rebuild
