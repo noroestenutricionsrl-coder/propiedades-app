@@ -51,7 +51,7 @@
   <div class="card-body">
     {% if servicios %}
     <table>
-      <thead><tr><th>Servicio</th><th>Tipo</th><th>N° Cuenta</th><th>N° Medidor</th><th>Responsable de pago</th></tr></thead>
+      <thead><tr><th>Servicio</th><th>Tipo</th><th>N° Cuenta</th><th>N° Medidor</th><th>Responsable de pago</th><th>Estado</th>{% if request.user.perfil.rol != 'consulta' %}<th>Acciones</th>{% endif %}</tr></thead>
       <tbody>
       {% for s in servicios %}
       <tr>
@@ -66,6 +66,22 @@
           <span style="color:#c9963a"><i class="fa-solid fa-person"></i> Inquilino</span>
           {% endif %}
         </td>
+        <td>
+          {% if s.activo %}
+          <span class="badge badge-disponible">Activo</span>
+          {% else %}
+          <span class="badge badge-vencido">Inactivo</span>
+          {% endif %}
+        </td>
+        {% if request.user.perfil.rol != 'consulta' %}
+        <td style="white-space:nowrap">
+          <a href="{% url 'propiedad_servicio_editar' s.pk %}" class="btn btn-secondary btn-sm" title="Editar"><i class="fa-solid fa-pen"></i></a>
+          <form method="post" action="{% url 'propiedad_servicio_eliminar' s.pk %}" style="display:inline" onsubmit="return confirm('¿Eliminar este servicio de la propiedad? Esta acción no se puede deshacer.');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-sm" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+          </form>
+        </td>
+        {% endif %}
       </tr>
       {% endfor %}
       </tbody>

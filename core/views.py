@@ -154,7 +154,7 @@ def propiedades_lista(request):
 @login_required
 def propiedad_detalle(request, pk):
     propiedad = get_object_or_404(Propiedad, pk=pk)
-    servicios = propiedad.servicios.filter(activo=True).select_related('servicio')
+    servicios = propiedad.servicios.all().select_related('servicio')
     contratos = propiedad.contratos.all().select_related('inquilino').order_by('-fecha_inicio')
     documentos = propiedad.documentos.all()
     
@@ -342,6 +342,39 @@ def servicio_agregar(request, propiedad_pk):
         'volver': 'propiedad_detalle',
         'volver_pk': propiedad_pk,
     })
+
+
+@login_required
+def propiedad_servicio_editar(request, pk):
+    from .forms import PropiedadServicioForm
+    ps = get_object_or_404(PropiedadServicio, pk=pk)
+    propiedad_pk = ps.propiedad.pk
+    if request.user.perfil.rol == 'consulta':
+        return redirect('propiedad_detalle', pk=propiedad_pk)
+    if request.method == 'POST':
+        form = PropiedadServicioForm(request.POST, instance=ps)
+        if form.is_valid():
+            form.save()
+            return redirect('propiedad_detalle', pk=propiedad_pk)
+    else:
+        form = PropiedadServicioForm(instance=ps)
+    return render(request, 'core/form_generico.html', {
+        'form': form,
+        'titulo': f'Editar Servicio — {ps.propiedad.domicilio}',
+        'volver': 'propiedad_detalle',
+        'volver_pk': propiedad_pk,
+    })
+
+
+@login_required
+def propiedad_servicio_eliminar(request, pk):
+    ps = get_object_or_404(PropiedadServicio, pk=pk)
+    propiedad_pk = ps.propiedad.pk
+    if request.user.perfil.rol == 'consulta':
+        return redirect('propiedad_detalle', pk=propiedad_pk)
+    if request.method == 'POST':
+        ps.delete()
+    return redirect('propiedad_detalle', pk=propiedad_pk)
 
 
 # ============ VENCIMIENTOS ============
